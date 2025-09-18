@@ -21,6 +21,7 @@ root.geometry("1000x600")
 # ======================
 Label(root, text="Maze Solver", font=("Arial", 20)).pack(pady=10)
 
+
 # ======================
 # Frame chứa combobox nhóm (xếp ngang trên cùng)
 # ======================
@@ -32,6 +33,18 @@ def on_select(event, group_id):
     selected_algo = event.widget.get()
     messagebox.showinfo("Thông báo", f"Bạn chọn {selected_algo} trong Nhóm {group_id}")
 
+# ======================
+# Danh sách thuật toán theo nhóm
+# ======================
+algorithms = {
+    1: ["BFS", "DFS", "UCS"],
+    2: ["Greedy Best First", "A*", "IDA*"],
+    3: ["Hill Climbing", "Simulated Annealing", "Genetic Algorithm"],
+    4: ["Backtracking", "Branch and Bound", "Constraint Propagation"],
+    5: ["Dynamic Programming", "Floyd-Warshall", "Dijkstra"],
+    6: ["Bellman-Ford", "Johnson’s Algorithm", "Warshall’s Algorithm"]
+}
+
 # Tạo 6 nhóm, mỗi nhóm có combobox
 for group in range(1, 7):
     frame = Frame(top_frame, padx=5, pady=5)
@@ -40,7 +53,7 @@ for group in range(1, 7):
     Label(frame, text=f"Nhóm {group}", font=("Arial", 10, "bold")).pack()
     combo = ttk.Combobox(
         frame,
-        values=[f"Thuật toán {i}" for i in range(1, 4)],
+        values=algorithms[group],
         state="readonly",
         width=15
     )
