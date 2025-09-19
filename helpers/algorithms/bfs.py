@@ -1,6 +1,6 @@
 from collections import deque
 
-def bfs_path(maze, start, goal):
+def find_path(maze, start, goal):
     R, C = len(maze), len(maze[0])
     q = deque([start])
     prev = {start: None}

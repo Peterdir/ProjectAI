@@ -1,6 +1,6 @@
 import tkinter as tk
 from config import *
-from helpers.bfs import bfs_path
+from helpers.loader import load_algorithm
 from PIL import Image, ImageTk
 #import messengerbox
 from tkinter import messagebox
@@ -89,7 +89,8 @@ class MazeApp:
         tk.messagebox.showinfo("Hoàn thành!", "Chúc mừng — bạn đã đến đích!")
 
     def show_solution(self):
-        path = bfs_path(MAZE, self.player, GOAL)
+        algorithm = load_algorithm("bfs") 
+        path = algorithm(MAZE, self.player, GOAL)
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
