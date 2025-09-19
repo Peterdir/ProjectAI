@@ -2,8 +2,8 @@ import tkinter as tk
 from config import *
 from helpers.loader import load_algorithm
 from PIL import Image, ImageTk
-#import messengerbox
 from tkinter import messagebox
+import os
 class MazeApp:
     def __init__(self, root):
         self.root = root
@@ -24,6 +24,15 @@ class MazeApp:
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
                                        var=self.toggle_grid_var, command=self.draw_maze)
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
+
+          # Load danh sách thuật toán từ thư mục
+        algo_dir = "helpers/algorithms"
+        self.algorithms = [f[:-3] for f in os.listdir(algo_dir) 
+                           if f.endswith(".py") and f != "__init__.py"]
+        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
+        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
+        self.algo_menu.grid(row=1, column=3, sticky="ew", padx=5, pady=5)
+
         # Load images (resize theo CELL_SIZE luôn)
         self.wall_img = ImageTk.PhotoImage(Image.open("assets/wall.png").resize((CELL_SIZE, CELL_SIZE)))
         self.player_img = ImageTk.PhotoImage(Image.open("assets/player.png").resize((CELL_SIZE, CELL_SIZE)))
@@ -89,8 +98,13 @@ class MazeApp:
         tk.messagebox.showinfo("Hoàn thành!", "Chúc mừng — bạn đã đến đích!")
 
     def show_solution(self):
-        algorithm = load_algorithm("bfs") 
+        algo_name = self.selected_algo.get()
+        if not algo_name:
+            tk.messagebox.showwarning("Chưa có thuật toán", "Không tìm thấy thuật toán nào trong thư mục.")
+            return
+        algorithm = load_algorithm(algo_name)
         path = algorithm(MAZE, self.player, GOAL)
+        
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
