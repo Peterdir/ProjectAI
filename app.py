@@ -1,8 +1,9 @@
 import tkinter as tk
-import tkinter.messagebox
 from config import *
 from solver import bfs_shortest_path
-
+from PIL import Image, ImageTk
+#import messengerbox
+from tkinter import messagebox
 class MazeApp:
     def __init__(self, root):
         self.root = root
@@ -23,7 +24,10 @@ class MazeApp:
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
                                        var=self.toggle_grid_var, command=self.draw_maze)
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
-
+        # Load images (resize theo CELL_SIZE luôn)
+        self.wall_img = ImageTk.PhotoImage(Image.open("assets/wall.png").resize((CELL_SIZE, CELL_SIZE)))
+        self.player_img = ImageTk.PhotoImage(Image.open("assets/player.png").resize((CELL_SIZE, CELL_SIZE)))
+        self.goal_img = ImageTk.PhotoImage(Image.open("assets/goal.png").resize((CELL_SIZE, CELL_SIZE)))
         self.player = START
         self.solution = None
         self.showing_solution = False
@@ -43,7 +47,7 @@ class MazeApp:
                 x0, y0 = c*CELL_SIZE, r*CELL_SIZE
                 x1, y1 = x0+CELL_SIZE, y0+CELL_SIZE
                 if MAZE[r][c] == 1:
-                    self.canvas.create_rectangle(x0,y0,x1,y1, fill=WALL_COLOR, outline=WALL_COLOR)
+                    self.canvas.create_image(x0, y0, image=self.wall_img, anchor="nw")
                 else:
                     self.canvas.create_rectangle(x0,y0,x1,y1, fill=PATH_COLOR, outline=PATH_COLOR)
 
@@ -54,8 +58,7 @@ class MazeApp:
                 self.canvas.create_line(c*CELL_SIZE, 0, c*CELL_SIZE, ROWS*CELL_SIZE, fill=GRID_LINE_COLOR)
 
         gr, gc = GOAL
-        self.canvas.create_rectangle(gc*CELL_SIZE, gr*CELL_SIZE, (gc+1)*CELL_SIZE, (gr+1)*CELL_SIZE,
-                                     fill=GOAL_COLOR, outline="black")
+        self.canvas.create_image(gc*CELL_SIZE, gr*CELL_SIZE, image=self.goal_img, anchor="nw")
 
         if self.showing_solution and self.solution:
             for (r,c) in self.solution:
@@ -68,9 +71,7 @@ class MazeApp:
     def draw_player(self):
         self.canvas.delete("player")
         r, c = self.player
-        x0, y0 = c*CELL_SIZE+4, r*CELL_SIZE+4
-        x1, y1 = (c+1)*CELL_SIZE-4, (r+1)*CELL_SIZE-4
-        self.canvas.create_oval(x0,y0,x1,y1, fill=PLAYER_COLOR, tags="player")
+        self.canvas.create_image(c*CELL_SIZE, r*CELL_SIZE, image=self.player_img, anchor="nw", tags="player")
 
     def move_player(self, dr, dc):
         nr, nc = self.player[0]+dr, self.player[1]+dc
