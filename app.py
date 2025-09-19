@@ -1,6 +1,6 @@
 import tkinter as tk
 from config import *
-from solver import bfs_shortest_path
+from helpers.bfs import bfs_path
 from PIL import Image, ImageTk
 #import messengerbox
 from tkinter import messagebox
@@ -39,7 +39,11 @@ class MazeApp:
         root.bind("<Down>", lambda e: self.move_player(1,0))
         root.bind("<Left>", lambda e: self.move_player(0,-1))
         root.bind("<Right>", lambda e: self.move_player(0,1))
-
+        # Thêm WASD
+        root.bind("w", lambda e: self.move_player(-1,0))
+        root.bind("s", lambda e: self.move_player(1,0))
+        root.bind("a", lambda e: self.move_player(0,-1))
+        root.bind("d", lambda e: self.move_player(0,1))
     def draw_maze(self):
         self.canvas.delete("all")
         for r in range(ROWS):
@@ -85,7 +89,7 @@ class MazeApp:
         tk.messagebox.showinfo("Hoàn thành!", "Chúc mừng — bạn đã đến đích!")
 
     def show_solution(self):
-        path = bfs_shortest_path(MAZE, self.player, GOAL)
+        path = bfs_path(MAZE, self.player, GOAL)
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
