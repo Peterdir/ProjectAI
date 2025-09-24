@@ -1,27 +1,34 @@
 from collections import deque
+from queue import Queue
+
+def check_valid(r, c, R, C, maze, parent):
+    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0 and (r, c) not in parent
 
 def find_path(maze, start, goal):
     R, C = len(maze), len(maze[0])
-    q = deque([start])
-    prev = {start: None}
+    queue = Queue()
+    queue.put(start)
+    parent = {start: None}
     dirs = [(-1,0),(1,0),(0,-1),(0,1)]
 
-    while q:
-        r, c = q.popleft()
-        if (r, c) == goal:
+    while not queue.empty():
+        r, c = queue.get()
+        if(r, c) == goal:
             break
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < R and 0 <= nc < C and maze[nr][nc] == 0 and (nr,nc) not in prev:
-                prev[(nr,nc)] = (r,c)
-                q.append((nr,nc))
 
-    if goal not in prev:
+        for dr, dc in dirs:
+            nr, nc = r + dr, c + dc
+            if check_valid(nr, nc, R, C, maze, parent):
+                parent[(nr, nc)] = (r, c)
+                queue.put((nr, nc))
+
+    if goal not in parent:
         return None
 
     path = []
     cur = goal
     while cur:
         path.append(cur)
-        cur = prev[cur]
+        cur = parent[cur]
+
     return list(reversed(path))

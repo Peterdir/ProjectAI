@@ -25,12 +25,12 @@ class MazeApp:
                                        var=self.toggle_grid_var, command=self.draw_maze)
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
 
-          # Load danh sách thuật toán từ thư mục
+        # Load danh sách thuật toán từ thư mục
         algo_dir = "helpers/algorithms"
         self.algorithms = [f[:-3] for f in os.listdir(algo_dir) 
-                           if f.endswith(".py") and f != "__init__.py"]
-        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
-        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
+                           if f.endswith(".py") and f != "__init__.py"] # Lệnh dùng để lấy tên các thuật toán có trong helpers/algorithms
+        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "") # Nếu self.algorithms không rỗng lưu thuật đầu tiên
+        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms) # Tạo 1 dropdown menu 
         self.algo_menu.grid(row=1, column=3, sticky="ew", padx=5, pady=5)
 
         # Load images (resize theo CELL_SIZE luôn)
@@ -75,6 +75,8 @@ class MazeApp:
 
         if self.showing_solution and self.solution:
             for (r,c) in self.solution:
+                if gr == r and gc == c:
+                    continue
                 x0, y0 = c*CELL_SIZE+3, r*CELL_SIZE+3
                 x1, y1 = (c+1)*CELL_SIZE-3, (r+1)*CELL_SIZE-3
                 self.canvas.create_rectangle(x0,y0,x1,y1, fill=SOLUTION_COLOR, outline="")
