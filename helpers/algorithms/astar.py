@@ -1,4 +1,7 @@
-import heapq
+from queue import PriorityQueue
+
+def check_valid(r, c, R, C, maze):
+    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0
 
 def heuristic(a, b):
     # Manhattan distance
@@ -6,31 +9,35 @@ def heuristic(a, b):
 
 def find_path(maze, start, goal):
     R, C = len(maze), len(maze[0])
-    pq = [(0, start)]  # (priority, node)
-    g_score = {start: 0}
-    prev = {start: None}
+    priorityQueue = PriorityQueue()
+    g_start = 0
+    f_start = heuristic(start, goal)
+    parent = {start: None}
+    priorityQueue.put((f_start, g_start, start))
+    cost = {start: 0}
     dirs = [(-1,0),(1,0),(0,-1),(0,1)]
 
-    while pq:
-        _, (r, c) = heapq.heappop(pq)
+    while not priorityQueue.empty():
+        f_val, g_val, (r, c) = priorityQueue.get()
         if (r, c) == goal:
             break
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < R and 0 <= nc < C and maze[nr][nc] == 0:
-                new_g = g_score[(r,c)] + 1
-                if (nr,nc) not in g_score or new_g < g_score[(nr,nc)]:
-                    g_score[(nr,nc)] = new_g
-                    f_score = new_g + heuristic((nr,nc), goal)
-                    heapq.heappush(pq, (f_score, (nr,nc)))
-                    prev[(nr,nc)] = (r,c)
 
-    if goal not in prev:
+        for dr, dc in dirs:
+            nr, nc = dr + r, dc + c
+            if check_valid(nr, nc, R, C, maze):
+                new_g = g_val + 1
+                if (nr, nc) not in cost or new_g < cost[(nr, nc)]:
+                    cost[(nr, nc)] = new_g
+                    parent[(nr, nc)] = (r, c)
+                    new_f = new_g + heuristic((nr, nc), goal)
+                    priorityQueue.put((new_f, new_g, (nr, nc)))
+
+    if goal not in parent:
         return None
 
     path = []
     cur = goal
-    while cur:
+    while cur is not None:
         path.append(cur)
-        cur = prev[cur]
+        cur = parent[cur]
     return list(reversed(path))
