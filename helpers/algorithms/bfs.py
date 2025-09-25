@@ -27,7 +27,7 @@ def find_path(maze, start, goal):
 
     path = []
     cur = goal
-    while cur:
+    while cur is not None:
         path.append(cur)
         cur = parent[cur]
 

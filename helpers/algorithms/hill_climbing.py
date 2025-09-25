@@ -1,37 +1,39 @@
+
+def check_valid(r, c, R, C, maze):
+    return 0 <= r < R and 0 <= c <= C and maze[r][c] == 0
+
+
 def heuristic(a, b):
     """Manhattan distance"""
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-def find_path(maze, start, goal, max_steps=10000):
-    """Greedy Hill Climbing cải tiến với backtracking"""
+def find_path(maze, start, goal):
     R, C = len(maze), len(maze[0])
     dirs = [(-1,0),(1,0),(0,-1),(0,1)]
-    stack = [(start, [start])]  # (current_pos, path_so_far)
-    visited = set([start])
-    steps = 0
+    current_state = start
+    current_heuristic = heuristic(start, goal)
+    path = [start]
 
-    while stack:
-        if steps >= max_steps:
-            return None
-        steps += 1
-
-        current, path = stack.pop()
-        if current == goal:
-            return path
-
-        # lấy neighbors chưa visited, sắp xếp theo heuristic nhỏ nhất
+    while True:
+        r, c = current_state
         neighbors = []
-        r, c = current
         for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < R and 0 <= nc < C and maze[nr][nc]==0 and (nr,nc) not in visited:
-                neighbors.append((nr,nc))
-        # sort neighbor theo heuristic
-        neighbors.sort(key=lambda x: heuristic(x, goal))
+            nr, nc = r + dr, c + dc
+            if check_valid(nr, nc, R, C, maze):
+                neighbors.append((nr, nc))
 
-        # đẩy neighbors vào stack (backtracking)
-        for n in reversed(neighbors):  # reversed vì stack pop cuối vào đầu
-            visited.add(n)
-            stack.append((n, path + [n]))
+        if not neighbors:
+            # Không có láng giềng hợp lệ
+            break
 
-    return None  # không tìm được
+        next_state = min(neighbors, key=lambda n: heuristic(n, goal))
+        next_heuristic = heuristic(next_state, goal)
+
+        if next_heuristic < current_heuristic:
+            path.append(next_state)
+            current_state = next_state
+            current_heuristic = next_heuristic
+        else:
+            break
+
+    return path if current_state == goal else None
