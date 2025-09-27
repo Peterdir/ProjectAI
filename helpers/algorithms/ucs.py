@@ -1,28 +1,30 @@
 import heapq
-def cost():
-    return 1
-def find_path(maze, start, goal):
-    ROWS = len(maze)
-    COLS = len(maze[0])
 
-    pq = [(0, start, [start])]
+def find_path(maze, start, goal):
+    """
+    Uniform Cost Search (giống Dijkstra)
+    - Luôn mở node có cost nhỏ nhất trước
+    - Cost ở đây = số bước đã đi
+    """
+    rows, cols = len(maze), len(maze[0])
+    frontier = [(0, start, [start])]  # (cost, node, path)
     visited = set()
 
-    while pq:
-        cost, (x,y), path = heapq.pop()
+    while frontier:
+        cost, (x, y), path = heapq.heappop(frontier)
 
-        if (x,y) == goal:
-            return path, cost
-        
-        if (x,y) in visited:
+        # Nếu đến đích thì trả về đường đi
+        if (x, y) == goal:
+            return path
+
+        if (x, y) in visited:
             continue
-        visited.add((x,y))
+        visited.add((x, y))
 
+        # Duyệt các ô kề
         for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
             nx, ny = x + dx, y + dy
-            if 0 <= nx < ROWS and 0 <= ny < COLS and maze[0][0]:
-                if (nx,ny) not in visited:
-                    heapq.heappush(pq,(cost + 1, (nx,ny), path + [(nx,ny)]))
-                
-        
-        return None, None # Bó tay
+            if 0 <= nx < rows and 0 <= ny < cols and maze[nx][ny] == 0:
+                heapq.heappush(frontier, (cost + 1, (nx, ny), path + [(nx, ny)]))
+
+    return None  # Không tìm thấy đường
