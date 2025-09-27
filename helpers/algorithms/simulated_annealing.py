@@ -1,53 +1,57 @@
-import random
-import math
+import math, random
 
-def heuristic(a, b):
-    return abs(a[0]-b[0]) + abs(a[1]-b[1])
-
-def find_path(maze, start, goal, max_steps=100000, initial_temp=100.0, cooling_rate=0.995):
+def get_neibor(pos, maze, visited):
     R, C = len(maze), len(maze[0])
-    dirs = [(-1,0),(1,0),(0,-1),(0,1)]
-    path = [start]
+    x_cur, y_cur = pos
+    neighbors = []
+    for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+        nx, ny = x_cur + dx, y_cur + dy
+        if 0 <= nx < R and 0 <= ny < C and maze[nx][ny] == 0 and (nx, ny) not in visited:
+            neighbors.append((nx, ny))
+    return neighbors
+
+def h(state, goal):
+    sx, sy = state
+    gx, gy = goal
+    return abs(sx - gx) + abs(sy - gy)
+
+def xac_suat(cur_cost, new_cost, temperature):
+    delta = cur_cost - new_cost
+    if delta > 0:
+        return 1.0  # Nếu bước mới tốt hơn -> chắc chắn nhận
+    return math.exp(delta / temperature)  # Xác suất nhận bước tệ hơn
+
+def find_path(maze, start, goal, temperature=100, alpha=0.99, min_temp=0.001, max_steps=5000):
+    R, C = len(maze), len(maze[0])
     current = start
-    steps = 0
-    temp = initial_temp
     visited = set([start])
-    deadend_counter = 0
+    path = [start]
+    steps = 0
 
-    while current != goal and steps < max_steps:
+    while temperature > min_temp and steps < max_steps:
         steps += 1
-        r, c = current
-        neighbors = [(r+dr, c+dc) for dr, dc in dirs if 0<=r+dr<R and 0<=c+dc<C and maze[r+dr][c+dc]==0 and (r+dr,c+dc) not in visited]
+        neighbors = get_neibor(current, maze, visited)
 
+        # Nếu không còn bước đi -> backtrack
         if not neighbors:
-            deadend_counter += 1
             if len(path) > 1:
-                # lùi tới ô gần nhất có neighbor chưa thử
-                for i in range(len(path)-2, -1, -1):
-                    r2, c2 = path[i]
-                    new_neighbors = [(r2+dr,c2+dc) for dr, dc in dirs if 0<=r2+dr<R and 0<=c2+dc<C and maze[r2+dr][c2+dc]==0 and (r2+dr,c2+dc) not in visited]
-                    if new_neighbors:
-                        current = (r2,c2)
-                        path = path[:i+1]
-                        break
+                path.pop()          # quay lại ô trước
+                current = path[-1]  # đặt current về ô trước đó
+                continue
             else:
-                return None
-            # restart nếu deadend lâu quá
-            if deadend_counter > 50:
-                current = random.choice(path)
-                temp = initial_temp
-                deadend_counter = 0
-            continue
+                return None  # không có đường
 
-        deadend_counter = 0
-        next_cell = random.choice(neighbors)
-        delta_h = heuristic(next_cell, goal) - heuristic(current, goal)
-        if delta_h < 0 or random.random() < math.exp(-delta_h/temp):
-            current = next_cell
-            path.append(current)
+        next_pos = random.choice(neighbors)
+        current_e = h(current, goal)
+        next_e = h(next_pos, goal)
+
+        if random.random() < xac_suat(current_e, next_e, temperature):
+            current = next_pos
             visited.add(current)
-        temp *= cooling_rate
-        if temp < 1e-3:
-            temp = initial_temp
+            path.append(current)
 
-    return path if current==goal else None
+            if current == goal:
+                return path
+        temperature*=alpha
+
+    return None
