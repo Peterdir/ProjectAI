@@ -1,25 +1,24 @@
 def find_path(maze, start, goal):
-    R, C = len(maze), len(maze[0])
-    stack = [start]
-    prev = {start: None}
-    dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+    ROWS = len(maze)
+    COLS = len(maze[0])
+
+    stack = [(start, [start])]
+    visited = set() # Dùng set để không bị trùng các ô đã qua
 
     while stack:
-        r, c = stack.pop()
-        if (r, c) == goal:
-            break
-        for dr, dc in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < R and 0 <= nc < C and maze[nr][nc] == 0 and (nr,nc) not in prev:
-                prev[(nr,nc)] = (r,c)
-                stack.append((nr,nc))
+        (x,y), path = stack.pop() # Lấy ô có tọa độ x và y trong path để xét
 
-    if goal not in prev:
-        return None
+        if (x,y) == goal:
+            return path
+        if (x,y) in visited:
+            continue
 
-    path = []
-    cur = goal
-    while cur:
-        path.append(cur)
-        cur = prev[cur]
-    return list(reversed(path))
+        visited.add(x,y)
+
+    # Di chuyển theo 4 hướng: lên, xuống, trái, phải
+    for dx, dy in [(-1,0),(1,0),(0,1),(0,-1)]:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < ROWS and 0 <= ny < COLS and maze[nx][ny] == 0: # Kiểm tra sau khi di chuyển thì nhân vật có còn nằm trong mê cung không
+            stack.append(((nx, ny), path +[(nx, ny)]))
+
+    return None  # Bó tay
