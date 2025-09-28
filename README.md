@@ -14,14 +14,18 @@
 │   │   ├── bfs.py
 │   │   ├── dfs.py
 │   │   ├── dls.py
+│   │   ├── genetic_algorithm_(inactive).py
+│   │   ├── hill_climbing.py
 │   │   ├── ids.py
+│   │   ├── local_beam_(inactive).py
+│   │   ├── simulated_annealing.py
 │   │   ├── ucs.py
 │   ├── loader.py
 ├── .gitignore
 ├── app.py
 ├── config.py
-├── __main__.py
 ├── README.md
+├── __main__.py
 ```
 
 ## 2. Yêu cầu hệ thống
@@ -36,7 +40,7 @@
 ## 3. Cài đặt và chạy
 
 ```bash
-git clone https://github.com/Peterdir/ProjectAI/tree/maze-tamida
+git clone https://github.com/Peterdir/ProjectAI/tree/maze-code
 pip install pillow tkinter
 ```
 
