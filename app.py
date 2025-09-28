@@ -8,6 +8,7 @@ class MazeApp:
     def __init__(self, root):
         self.root = root
         root.title("Mê Cung - Tkinter (Có lời giải)")
+
         canvas_w = COLS * CELL_SIZE
         canvas_h = ROWS * CELL_SIZE
 
@@ -53,6 +54,7 @@ class MazeApp:
         root.bind("s", lambda e: self.move_player(1,0))
         root.bind("a", lambda e: self.move_player(0,-1))
         root.bind("d", lambda e: self.move_player(0,1))
+        
     def draw_maze(self):
         self.canvas.delete("all")
         for r in range(ROWS):
@@ -69,13 +71,12 @@ class MazeApp:
                 self.canvas.create_line(0, r*CELL_SIZE, COLS*CELL_SIZE, r*CELL_SIZE, fill=GRID_LINE_COLOR)
             for c in range(COLS+1):
                 self.canvas.create_line(c*CELL_SIZE, 0, c*CELL_SIZE, ROWS*CELL_SIZE, fill=GRID_LINE_COLOR)
-
         gr, gc = GOAL
         self.canvas.create_image(gc*CELL_SIZE, gr*CELL_SIZE, image=self.goal_img, anchor="nw")
 
         if self.showing_solution and self.solution:
             for (r,c) in self.solution:
-                if gr == r and gc == c:
+                if (r, c) == GOAL or (r, c) == START:
                     continue
                 x0, y0 = c*CELL_SIZE+3, r*CELL_SIZE+3
                 x1, y1 = (c+1)*CELL_SIZE-3, (r+1)*CELL_SIZE-3
@@ -101,21 +102,53 @@ class MazeApp:
 
     def show_solution(self):
         algo_name = self.selected_algo.get()
+
         if not algo_name:
             tk.messagebox.showwarning("Chưa có thuật toán", "Không tìm thấy thuật toán nào trong thư mục.")
             return
+        
         algorithm = load_algorithm(algo_name)
-        path = algorithm(MAZE, self.player, GOAL)
+        
+        # Chức năng mới (Tô màu các ô được mở rộng đề tìm kiếm)
+        def callback(pos):
+            self.highlight_cell(pos, color="blue")
+
+        path = algorithm(MAZE, self.player, GOAL, callback=callback)
         
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
+        
         self.solution = path
         self.showing_solution = True
-        self.draw_maze()
+
+        for r, c in path:
+            self.highlight_cell((r, c), color="green")
+            self.canvas.update()
+            self.canvas.after(50)
+
+        for r, c in path:
+            self.player = (r, c)
+            self.draw_player()
+            self.canvas.update()
+            self.canvas.after(100)
+
+        self.on_win()
 
     def reset_player(self):
         self.player = START
         self.solution = None
         self.showing_solution = False
         self.draw_maze()
+
+    # Chức năng mới (Tô màu các ô được mở rộng để tìm kiếm)
+    def highlight_cell(self, pos, color="yellow"):
+        r, c = pos
+        if (r, c) == START or (r, c) == GOAL:
+            return
+
+        x0, y0 = c*CELL_SIZE+3, r*CELL_SIZE+3
+        x1, y1 = (c+1)*CELL_SIZE-3, (r+1)*CELL_SIZE-3
+        self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
+        self.canvas.update()
+        self.canvas.after(1)

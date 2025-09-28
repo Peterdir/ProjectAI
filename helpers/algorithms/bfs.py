@@ -4,7 +4,7 @@ from queue import Queue
 def check_valid(r, c, R, C, maze, parent):
     return 0 <= r < R and 0 <= c < C and maze[r][c] == 0 and (r, c) not in parent
 
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     R, C = len(maze), len(maze[0])
     queue = Queue()
     queue.put(start)
@@ -13,6 +13,11 @@ def find_path(maze, start, goal):
 
     while not queue.empty():
         r, c = queue.get()
+
+        # --- gọi callback để tô màu ô đang mở rộng ---
+        if callback:
+            callback((r, c))
+
         if(r, c) == goal:
             break
 

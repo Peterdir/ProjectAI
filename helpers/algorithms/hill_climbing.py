@@ -7,7 +7,7 @@ def heuristic(a, b):
     """Manhattan distance"""
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     R, C = len(maze), len(maze[0])
     dirs = [(-1,0),(1,0),(0,-1),(0,1)]
     current_state = start
@@ -21,6 +21,9 @@ def find_path(maze, start, goal):
             nr, nc = r + dr, c + dc
             if check_valid(nr, nc, R, C, maze):
                 neighbors.append((nr, nc))
+
+                if callback:
+                    callback((nr, nc))  # tô màu ô đang được xét
 
         if not neighbors:
             # Không có láng giềng hợp lệ

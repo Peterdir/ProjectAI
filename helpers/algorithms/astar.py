@@ -7,7 +7,7 @@ def heuristic(a, b):
     # Manhattan distance
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     R, C = len(maze), len(maze[0])
     priorityQueue = PriorityQueue()
     g_start = 0
@@ -31,6 +31,10 @@ def find_path(maze, start, goal):
                     parent[(nr, nc)] = (r, c)
                     new_f = new_g + heuristic((nr, nc), goal)
                     priorityQueue.put((new_f, new_g, (nr, nc)))
+
+                    # gọi callback nếu có
+                    if callback:
+                        callback((nr, nc))
 
     if goal not in parent:
         return None
