@@ -1,4 +1,6 @@
-def depth_limited_dfs(maze, start, goal, callback, limit):
+import time
+
+def depth_limited_dfs(maze, start, goal, callback, limit, update_callback=None, t0=None, steps_ref=None):
     R, C = len(maze), len(maze[0])
     stack = [(start, 0)]
     prev = {start: None}
@@ -6,6 +8,20 @@ def depth_limited_dfs(maze, start, goal, callback, limit):
 
     while stack:
         (r, c), depth = stack.pop()
+        if steps_ref is not None:
+            steps_ref[0] += 1
+
+        # live metrics
+        if update_callback:
+            stats = {
+                "Steps": steps_ref[0] if steps_ref is not None else None,
+                "Visited nodes": len(prev),
+                "Depth": depth,
+                "Current node": (r, c),
+                "Time (ms)": ((time.time()-t0)*1000) if t0 else None,
+            }
+            update_callback(stats, highlight_keys=[k for k,v in stats.items() if v is not None])
+
         if callback:
             callback((r, c))  # Gọi callback mỗi khi ô được thăm
             
@@ -19,16 +35,37 @@ def depth_limited_dfs(maze, start, goal, callback, limit):
                     stack.append(((nr,nc), depth+1))
     return None
 
-def find_path(maze, start, goal, callback = None):
+def find_path(maze, start, goal, callback = None, update_callback=None, max_limit=1000):
     limit = 0
+    t0 = time.time()
+    steps_ref = [0]
+    stats = {}
     while True:
-        prev = depth_limited_dfs(maze, start, goal, callback, limit)
+        prev = depth_limited_dfs(maze, start, goal, callback, limit, update_callback, t0, steps_ref)
         if prev and goal in prev:
             path, cur = [], goal
             while cur:
                 path.append(cur)
                 cur = prev[cur]
-            return list(reversed(path))
+            path = list(reversed(path))
+            stats = {
+                "Steps": steps_ref[0],
+                "Visited nodes": len(prev),
+                "Depth limit": limit,
+                "Path length": len(path),
+                "Time (ms)": (time.time()-t0)*1000
+            }
+            if update_callback:
+                update_callback(stats, highlight_keys=list(stats.keys()))
+            return path, stats
         limit += 1
-        if limit > 1000:  # tránh vòng lặp vô hạn
-            return None
+        if limit > max_limit:  # tránh vòng lặp vô hạn
+            stats = {
+                "Steps": steps_ref[0],
+                "Visited nodes": len(prev) if prev else 0,
+                "Depth limit": limit,
+                "Time (ms)": (time.time()-t0)*1000
+            }
+            if update_callback:
+                update_callback(stats, highlight_keys=list(stats.keys()))
+            return None, stats

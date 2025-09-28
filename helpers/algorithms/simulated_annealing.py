@@ -1,4 +1,5 @@
 import math, random
+import time
 
 def get_neibor(pos, maze, visited):
     R, C = len(maze), len(maze[0])
@@ -21,12 +22,14 @@ def xac_suat(cur_cost, new_cost, temperature):
         return 1.0  # Nếu bước mới tốt hơn -> chắc chắn nhận
     return math.exp(delta / temperature)  # Xác suất nhận bước tệ hơn
 
-def find_path(maze, start, goal, callback = None, temperature=100, alpha=0.99, min_temp=0.001, max_steps=5000):
+def find_path(maze, start, goal, callback = None, update_callback=None, temperature=100, alpha=0.99, min_temp=0.001, max_steps=5000):
     R, C = len(maze), len(maze[0])
     current = start
     visited = set([start])
     path = [start]
     steps = 0
+    t0 = time.time()
+    stats = {}
 
     while temperature > min_temp and steps < max_steps:
         steps += 1
@@ -39,7 +42,16 @@ def find_path(maze, start, goal, callback = None, temperature=100, alpha=0.99, m
                 current = path[-1]  # đặt current về ô trước đó
                 continue
             else:
-                return None  # không có đường
+                stats = {
+                    "Steps": steps,
+                    "Visited nodes": len(visited),
+                    "Temperature": temperature,
+                    "Path length": len(path),
+                    "Time (ms)": (time.time() - t0) * 1000
+                }
+                if update_callback:
+                    update_callback(stats, highlight_keys=list(stats.keys()))
+                return None, stats  # không có đường
 
         next_pos = random.choice(neighbors)
         current_e = h(current, goal)
@@ -55,7 +67,38 @@ def find_path(maze, start, goal, callback = None, temperature=100, alpha=0.99, m
                 callback(current)
                 
             if current == goal:
-                return path
+                stats = {
+                    "Steps": steps,
+                    "Visited nodes": len(visited),
+                    "Temperature": temperature,
+                    "Path length": len(path),
+                    "Time (ms)": (time.time() - t0) * 1000
+                }
+                if update_callback:
+                    update_callback(stats, highlight_keys=list(stats.keys()))
+                return path, stats
         temperature*=alpha
 
-    return None
+        # live update each iteration
+        stats = {
+            "Steps": steps,
+            "Visited nodes": len(visited),
+            "Temperature": temperature,
+            "Path length": len(path),
+            "Current node": current,
+            "Time (ms)": (time.time() - t0) * 1000
+        }
+        if update_callback:
+            update_callback(stats, highlight_keys=list(stats.keys()))
+
+    # hết vòng lặp mà chưa tới đích
+    stats = {
+        "Steps": steps,
+        "Visited nodes": len(visited),
+        "Temperature": temperature,
+        "Path length": len(path),
+        "Time (ms)": (time.time() - t0) * 1000
+    }
+    if update_callback:
+        update_callback(stats, highlight_keys=list(stats.keys()))
+    return None, stats
