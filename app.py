@@ -8,7 +8,7 @@ class MazeApp:
     def __init__(self, root):
         self.root = root
         root.title("Mê Cung - Tkinter (Có lời giải)")
-
+        root.state("zoomed")
         canvas_w = COLS * CELL_SIZE
         canvas_h = ROWS * CELL_SIZE
 
@@ -31,14 +31,11 @@ class MazeApp:
         self.algorithms = [f[:-3] for f in os.listdir(algo_dir) 
                            if f.endswith(".py") and f != "__init__.py"] # Lệnh dùng để lấy tên các thuật toán có trong helpers/algorithms
         self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "") # Nếu self.algorithms không rỗng lưu thuật đầu tiên
-        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms) # Tạo 1 dropdown menu 
-        self.algo_menu.grid(row=1, column=3, sticky="ew", padx=5, pady=5)
-        
+        self.selected_algo = tk.StringVar(value=self.algorithms[0])
+        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
+        self.algo_menu.grid(row=2, column=0, sticky="w", padx=5, pady=5)
         self.right_panel = tk.Frame(root)
         self.right_panel.grid(row=0, column=3, rowspan=2, sticky="ns", padx=(5, 5), pady=5)
-                # Dropdown chọn thuật toán đặt ở trên cùng panel phải
-        self.algo_menu = tk.OptionMenu(self.right_panel, self.selected_algo, *self.algorithms)
-        self.algo_menu.pack(side="top", fill="x", pady=(0,5))
 
         # Bảng hiển thị chỉ số thuật toán (dạng key-value để hỗ trợ nhiều thuật toán)
         self.metrics_tree = ttk.Treeview(
