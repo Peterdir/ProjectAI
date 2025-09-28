@@ -2,7 +2,7 @@ import tkinter as tk
 from config import *
 from helpers.loader import load_algorithm
 from PIL import Image, ImageTk
-from tkinter import messagebox
+from tkinter import messagebox,ttk
 import os
 class MazeApp:
     def __init__(self, root):
@@ -33,7 +33,32 @@ class MazeApp:
         self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "") # Nếu self.algorithms không rỗng lưu thuật đầu tiên
         self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms) # Tạo 1 dropdown menu 
         self.algo_menu.grid(row=1, column=3, sticky="ew", padx=5, pady=5)
+        
+        self.right_panel = tk.Frame(root)
+        self.right_panel.grid(row=0, column=3, rowspan=2, sticky="ns", padx=(5, 5), pady=5)
+                # Dropdown chọn thuật toán đặt ở trên cùng panel phải
+        self.algo_menu = tk.OptionMenu(self.right_panel, self.selected_algo, *self.algorithms)
+        self.algo_menu.pack(side="top", fill="x", pady=(0,5))
 
+        # Bảng hiển thị chỉ số thuật toán (dạng key-value để hỗ trợ nhiều thuật toán)
+        self.metrics_tree = ttk.Treeview(
+            self.right_panel,
+            columns=("metric", "value"),
+            show="headings",
+            height=15,
+        )
+        self.metrics_tree.heading("metric", text="Chỉ số")
+        self.metrics_tree.heading("value", text="Giá trị")
+        self.metrics_tree.column("metric", width=160, anchor="w")
+        self.metrics_tree.column("value", width=180, anchor="center")
+
+        # Scrollbar dọc cho bảng
+        metrics_scrollbar = ttk.Scrollbar(self.right_panel, orient="vertical", command=self.metrics_tree.yview)
+        self.metrics_tree.configure(yscrollcommand=metrics_scrollbar.set)
+
+        # Sắp xếp trong khung bên phải
+        self.metrics_tree.pack(side="left", fill="both", expand=True)
+        metrics_scrollbar.pack(side="right", fill="y")
         # Load images (resize theo CELL_SIZE luôn)
         self.wall_img = ImageTk.PhotoImage(Image.open("assets/wall.png").resize((CELL_SIZE, CELL_SIZE)))
         self.player_img = ImageTk.PhotoImage(Image.open("assets/player.png").resize((CELL_SIZE, CELL_SIZE)))
@@ -164,4 +189,24 @@ class MazeApp:
         x1, y1 = (c+1)*CELL_SIZE-3, (r+1)*CELL_SIZE-3
         self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
         self.canvas.update()
-        self.canvas.after(1)
+        self.canvas.after(1)   
+    
+    def update_metrics_table(self, metrics):
+        # Xóa dòng cũ
+        for item in self.metrics_tree.get_children():
+            self.metrics_tree.delete(item)
+
+        if not metrics:
+            return
+
+        # Chèn từng cặp key-value. Định dạng các giá trị số cho đẹp.
+        for key, val in metrics.items():
+            display_val = val
+            if isinstance(val, float):
+                # Định dạng ms/ratio đẹp hơn
+                if key.endswith("ms"):
+                    display_val = f"{val:.3f}"
+                else:
+                    display_val = f"{val:.4f}"
+            self.metrics_tree.insert("", "end", values=(key, display_val))
+    
