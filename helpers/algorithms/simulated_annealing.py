@@ -21,7 +21,7 @@ def xac_suat(cur_cost, new_cost, temperature):
         return 1.0  # Nếu bước mới tốt hơn -> chắc chắn nhận
     return math.exp(delta / temperature)  # Xác suất nhận bước tệ hơn
 
-def find_path(maze, start, goal, temperature=100, alpha=0.99, min_temp=0.001, max_steps=5000):
+def find_path(maze, start, goal, callback = None, temperature=100, alpha=0.99, min_temp=0.001, max_steps=5000):
     R, C = len(maze), len(maze[0])
     current = start
     visited = set([start])
@@ -50,6 +50,10 @@ def find_path(maze, start, goal, temperature=100, alpha=0.99, min_temp=0.001, ma
             visited.add(current)
             path.append(current)
 
+            # Gọi callback mỗi khi bước thành công
+            if callback:
+                callback(current)
+                
             if current == goal:
                 return path
         temperature*=alpha

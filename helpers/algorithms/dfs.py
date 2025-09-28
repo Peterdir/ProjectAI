@@ -1,4 +1,4 @@
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     ROWS = len(maze)
     COLS = len(maze[0])
 
@@ -22,4 +22,8 @@ def find_path(maze, start, goal):
             if 0 <= nx < ROWS and 0 <= ny < COLS and maze[nx][ny] == 0: # Kiểm tra sau khi di chuyển thì nhân vật có còn nằm trong mê cung không
                 stack.append(((nx, ny), path +[(nx, ny)]))
 
-    return None  # Bó tay
+                # Gọi callback khi ô được mở rộng
+                if callback:
+                    callback((nx, ny))
+
+    return None

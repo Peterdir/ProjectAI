@@ -1,4 +1,4 @@
-def depth_limited_dfs(maze, start, goal, limit):
+def depth_limited_dfs(maze, start, goal, callback, limit):
     R, C = len(maze), len(maze[0])
     stack = [(start, 0)]
     prev = {start: None}
@@ -15,10 +15,13 @@ def depth_limited_dfs(maze, start, goal, limit):
             if 0 <= nr < R and 0 <= nc < C and maze[nr][nc] == 0 and (nr,nc) not in prev:
                 prev[(nr,nc)] = (r,c)
                 stack.append(((nr,nc), depth+1))
+
+                if callback:
+                    callback((nr, nc))  # tô màu ô được mở rộng
     return prev if goal in prev else None
 
-def find_path(maze, start, goal, limit=200):
-    prev = depth_limited_dfs(maze, start, goal, limit)
+def find_path(maze, start, goal, callback = None, limit=200):
+    prev = depth_limited_dfs(maze, start, goal, callback, limit)
     if not prev or goal not in prev:
         return None
 

@@ -1,4 +1,4 @@
-def depth_limited_dfs(maze, start, goal, limit):
+def depth_limited_dfs(maze, start, goal, callback, limit):
     R, C = len(maze), len(maze[0])
     stack = [(start, 0)]
     prev = {start: None}
@@ -6,6 +6,9 @@ def depth_limited_dfs(maze, start, goal, limit):
 
     while stack:
         (r, c), depth = stack.pop()
+        if callback:
+            callback((r, c))  # Gọi callback mỗi khi ô được thăm
+            
         if (r, c) == goal:
             return prev
         if depth < limit:
@@ -16,10 +19,10 @@ def depth_limited_dfs(maze, start, goal, limit):
                     stack.append(((nr,nc), depth+1))
     return None
 
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     limit = 0
     while True:
-        prev = depth_limited_dfs(maze, start, goal, limit)
+        prev = depth_limited_dfs(maze, start, goal, callback, limit)
         if prev and goal in prev:
             path, cur = [], goal
             while cur:

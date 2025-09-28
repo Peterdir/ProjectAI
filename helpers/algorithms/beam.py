@@ -6,7 +6,7 @@ def heuristic(node, goal):
     gx, gy = goal
     return abs(x - gx) + abs(y - gy)
 
-def find_path(maze, start, goal, beam_width=3):
+def find_path(maze, start, goal, callback = None, beam_width=3):
     """
     Beam Search đơn giản.
     - Không ghi đè start/goal (dùng giá trị được truyền vào).
@@ -28,12 +28,10 @@ def find_path(maze, start, goal, beam_width=3):
             if (x, y) == goal:
                 return path
 
-            # Nếu đã thăm rồi thì bỏ qua
             if (x, y) in visited:
                 continue
             visited.add((x, y))
 
-            # Mở rộng các hàng xóm
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < ROWS and 0 <= ny < COLS and maze[nx][ny] == 0:
@@ -42,6 +40,10 @@ def find_path(maze, start, goal, beam_width=3):
                     new_path = path + [(nx, ny)]
                     new_score = heuristic((nx, ny), goal)
                     new_frontier.append((new_score, (nx, ny), new_path))
+
+                    # Gọi callback để tô màu ô đang xét
+                    if callback:
+                        callback((nx, ny))
 
         # Sắp xếp các ứng viên mới theo score (nhỏ->lớn) và dùng ở vòng tiếp theo
         frontier = sorted(new_frontier, key=lambda x: x[0])

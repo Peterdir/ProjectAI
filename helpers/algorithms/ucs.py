@@ -1,6 +1,6 @@
 import heapq
 
-def find_path(maze, start, goal):
+def find_path(maze, start, goal, callback = None):
     """
     Uniform Cost Search (giống Dijkstra)
     - Luôn mở node có cost nhỏ nhất trước
@@ -20,6 +20,10 @@ def find_path(maze, start, goal):
         if (x, y) in visited:
             continue
         visited.add((x, y))
+
+        # Gọi callback để tô màu ô được mở rộng
+        if callback:
+            callback((x, y))
 
         # Duyệt các ô kề
         for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:

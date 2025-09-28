@@ -40,6 +40,7 @@ class MazeApp:
         self.goal_img = ImageTk.PhotoImage(Image.open("assets/goal.png").resize((CELL_SIZE, CELL_SIZE)))
         self.player = START
         self.solution = None
+        self.running = False
         self.showing_solution = False
 
         self.draw_maze()
@@ -108,13 +109,18 @@ class MazeApp:
             return
         
         algorithm = load_algorithm(algo_name)
+        self.running = True
         
         # Chức năng mới (Tô màu các ô được mở rộng đề tìm kiếm)
         def callback(pos):
+            if not self.running:
+                return
             self.highlight_cell(pos, color="blue")
 
         path = algorithm(MAZE, self.player, GOAL, callback=callback)
         
+        if not self.running:
+            return
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
@@ -123,19 +129,26 @@ class MazeApp:
         self.showing_solution = True
 
         for r, c in path:
+            if not self.running:
+                break
             self.highlight_cell((r, c), color="green")
             self.canvas.update()
             self.canvas.after(50)
 
         for r, c in path:
+            if not self.running:
+                break
             self.player = (r, c)
             self.draw_player()
             self.canvas.update()
             self.canvas.after(100)
 
-        self.on_win()
+        if self.running:
+            self.on_win()
+        self.running = False
 
     def reset_player(self):
+        self.running = False
         self.player = START
         self.solution = None
         self.showing_solution = False

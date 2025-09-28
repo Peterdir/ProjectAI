@@ -42,7 +42,7 @@ def mutate(individual, mutation_rate=0.1):
     moves = ['U','D','L','R']
     return [random.choice(moves) if random.random() < mutation_rate else m for m in individual]
 
-def find_path(maze, start, goal, population_size=50, generations=200, move_length=150):
+def find_path(maze, start, goal, callback = None, population_size=50, generations=200, move_length=150):
     # khởi tạo population
     population = [generate_individual(start, move_length) for _ in range(population_size)]
     
@@ -60,6 +60,9 @@ def find_path(maze, start, goal, population_size=50, generations=200, move_lengt
             if 0 <= r < len(maze) and 0 <= c < len(maze[0]) and maze[r][c]==0:
                 pos = (r,c)
                 path.append(pos)
+
+                if callback:
+                    callback(pos)  # tô màu ô này
             if pos==goal:
                 return path
 
