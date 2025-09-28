@@ -139,7 +139,14 @@ class MazeApp:
                 return
             self.highlight_cell(pos, color="blue")
 
-        path = algorithm(MAZE, self.player, GOAL, callback=callback)
+            
+        def metrics_callback(stats, highlight_keys):
+            if self.running:
+                self.update_metrics_live(stats, highlight_keys)
+        
+        path, metrics = algorithm(MAZE, self.player, GOAL,
+                              callback=callback,
+                              update_callback=metrics_callback)
         
         if not self.running:
             return
@@ -147,6 +154,7 @@ class MazeApp:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
         
+        self.update_metrics_table(metrics)
         self.solution = path
         self.showing_solution = True
 
@@ -207,3 +215,24 @@ class MazeApp:
                     display_val = f"{val:.4f}"
             self.metrics_tree.insert("", "end", values=(key, display_val))
     
+    def update_metrics_live(self, metrics, highlight_keys=[]):
+        # Xóa dòng cũ
+        for item in self.metrics_tree.get_children():
+            self.metrics_tree.delete(item)
+
+        if not metrics:
+            return
+
+        for key, val in metrics.items():
+            display_val = val
+            if isinstance(val, float):
+                if key.endswith("ms"):
+                    display_val = f"{val:.3f}"
+                else:
+                    display_val = f"{val:.4f}"
+            iid = self.metrics_tree.insert("", "end", values=(key, display_val))
+
+            if key in highlight_keys:
+                self.metrics_tree.item(iid, tags=("highlight"))
+
+        self.metrics_tree.update()
