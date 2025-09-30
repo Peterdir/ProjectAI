@@ -2,8 +2,9 @@ import tkinter as tk
 from config import *
 from helpers.loader import load_algorithm
 from PIL import Image, ImageTk
-from tkinter import messagebox,ttk
-import os
+from tkinter import messagebox, ttk
+import os, random
+
 class MazeApp:
     def __init__(self, root):
         self.root = root
@@ -21,6 +22,9 @@ class MazeApp:
         self.reset_btn = tk.Button(root, text="Reset", command=self.reset_player)
         self.reset_btn.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
 
+        self.random_maze_btn = tk.Button(root, text="Random Mê Cung", command=self.random_maze)
+        self.random_maze_btn.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+
         self.toggle_grid_var = tk.BooleanVar(value=True)
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
                                        var=self.toggle_grid_var, command=self.draw_maze)
@@ -28,16 +32,16 @@ class MazeApp:
 
         # Load danh sách thuật toán từ thư mục
         algo_dir = "helpers/algorithms"
-        self.algorithms = [f[:-3] for f in os.listdir(algo_dir) 
-                           if f.endswith(".py") and f != "__init__.py"] # Lệnh dùng để lấy tên các thuật toán có trong helpers/algorithms
-        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "") # Nếu self.algorithms không rỗng lưu thuật đầu tiên
-        self.selected_algo = tk.StringVar(value=self.algorithms[0])
+        self.algorithms = [f[:-3] for f in os.listdir(algo_dir)
+                           if f.endswith(".py") and f != "__init__.py"]
+        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
         self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
         self.algo_menu.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+
         self.right_panel = tk.Frame(root)
         self.right_panel.grid(row=0, column=3, rowspan=2, sticky="ns", padx=(5, 5), pady=5)
 
-        # Bảng hiển thị chỉ số thuật toán (dạng key-value để hỗ trợ nhiều thuật toán)
+        # Bảng hiển thị chỉ số thuật toán
         self.metrics_tree = ttk.Treeview(
             self.right_panel,
             columns=("metric", "value"),
@@ -49,17 +53,17 @@ class MazeApp:
         self.metrics_tree.column("metric", width=160, anchor="w")
         self.metrics_tree.column("value", width=180, anchor="center")
 
-        # Scrollbar dọc cho bảng
         metrics_scrollbar = ttk.Scrollbar(self.right_panel, orient="vertical", command=self.metrics_tree.yview)
         self.metrics_tree.configure(yscrollcommand=metrics_scrollbar.set)
 
-        # Sắp xếp trong khung bên phải
         self.metrics_tree.pack(side="left", fill="both", expand=True)
         metrics_scrollbar.pack(side="right", fill="y")
-        # Load images (resize theo CELL_SIZE luôn)
+
+        # Load images
         self.wall_img = ImageTk.PhotoImage(Image.open("assets/wall.png").resize((CELL_SIZE, CELL_SIZE)))
         self.player_img = ImageTk.PhotoImage(Image.open("assets/player.png").resize((CELL_SIZE, CELL_SIZE)))
         self.goal_img = ImageTk.PhotoImage(Image.open("assets/goal.png").resize((CELL_SIZE, CELL_SIZE)))
+
         self.player = START
         self.solution = None
         self.running = False
@@ -68,16 +72,16 @@ class MazeApp:
         self.draw_maze()
         self.draw_player()
 
+        # Bind phím
         root.bind("<Up>", lambda e: self.move_player(-1,0))
         root.bind("<Down>", lambda e: self.move_player(1,0))
         root.bind("<Left>", lambda e: self.move_player(0,-1))
         root.bind("<Right>", lambda e: self.move_player(0,1))
-        # Thêm WASD
         root.bind("w", lambda e: self.move_player(-1,0))
         root.bind("s", lambda e: self.move_player(1,0))
         root.bind("a", lambda e: self.move_player(0,-1))
         root.bind("d", lambda e: self.move_player(0,1))
-        
+
     def draw_maze(self):
         self.canvas.delete("all")
         for r in range(ROWS):
@@ -129,31 +133,29 @@ class MazeApp:
         if not algo_name:
             tk.messagebox.showwarning("Chưa có thuật toán", "Không tìm thấy thuật toán nào trong thư mục.")
             return
-        
+
         algorithm = load_algorithm(algo_name)
         self.running = True
-        
-        # Chức năng mới (Tô màu các ô được mở rộng đề tìm kiếm)
+
         def callback(pos):
             if not self.running:
                 return
             self.highlight_cell(pos, color="blue")
 
-            
         def metrics_callback(stats, highlight_keys):
             if self.running:
                 self.update_metrics_live(stats, highlight_keys)
-        
+
         path, metrics = algorithm(MAZE, self.player, GOAL,
                               callback=callback,
                               update_callback=metrics_callback)
-        
+
         if not self.running:
             return
         if not path:
             tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
             return
-        
+
         self.update_metrics_table(metrics)
         self.solution = path
         self.showing_solution = True
@@ -184,7 +186,6 @@ class MazeApp:
         self.showing_solution = False
         self.draw_maze()
 
-    # Chức năng mới (Tô màu các ô được mở rộng để tìm kiếm)
     def highlight_cell(self, pos, color="yellow"):
         r, c = pos
         if (r, c) == START or (r, c) == GOAL:
@@ -194,29 +195,25 @@ class MazeApp:
         x1, y1 = (c+1)*CELL_SIZE-3, (r+1)*CELL_SIZE-3
         self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
         self.canvas.update()
-        self.canvas.after(1)   
-    
+        self.canvas.after(1)
+
     def update_metrics_table(self, metrics):
-        # Xóa dòng cũ
         for item in self.metrics_tree.get_children():
             self.metrics_tree.delete(item)
 
         if not metrics:
             return
 
-        # Chèn từng cặp key-value. Định dạng các giá trị số cho đẹp.
         for key, val in metrics.items():
             display_val = val
             if isinstance(val, float):
-                # Định dạng ms/ratio đẹp hơn
                 if key.endswith("ms"):
                     display_val = f"{val:.3f}"
                 else:
                     display_val = f"{val:.4f}"
             self.metrics_tree.insert("", "end", values=(key, display_val))
-    
+
     def update_metrics_live(self, metrics, highlight_keys=[]):
-        # Xóa dòng cũ
         for item in self.metrics_tree.get_children():
             self.metrics_tree.delete(item)
 
@@ -236,3 +233,37 @@ class MazeApp:
                 self.metrics_tree.item(iid, tags=("highlight"))
 
         self.metrics_tree.update()
+
+    def random_maze(self):
+        global MAZE, START, GOAL, ROWS, COLS
+        ROWS, COLS = 21, 31
+        maze = [[1 for _ in range(COLS)] for _ in range(ROWS)]
+
+        def carve_passages_from(r, c):
+            directions = [(0,1),(0,-1),(1,0),(-1,0)]
+            random.shuffle(directions)
+            for dr, dc in directions:
+                nr, nc = r + dr*2, c + dc*2
+                if 0 <= nr < ROWS and 0 <= nc < COLS and maze[nr][nc] == 1:
+                    maze[r+dr][c+dc] = 0
+                    maze[nr][nc] = 0
+                    carve_passages_from(nr, nc)
+
+        # Bắt đầu từ (0,0)
+        maze[0][0] = 0
+        carve_passages_from(0, 0)
+
+        # Ép start và goal là ô trống
+        START = (0, 0)
+        GOAL = (ROWS-1, COLS-1)
+        maze[START[0]][START[1]] = 0
+        maze[GOAL[0]][GOAL[1]] = 0
+
+        MAZE = maze
+
+        # Reset
+        self.player = START
+        self.solution = None
+        self.showing_solution = False
+        self.draw_maze()
+        self.draw_player()
