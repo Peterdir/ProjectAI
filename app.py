@@ -13,7 +13,13 @@ class MazeApp:
         root.state("zoomed")
         canvas_w = COLS * CELL_SIZE
         canvas_h = ROWS * CELL_SIZE
+        # Frame chứa canvas
+        self.canvas_frame = tk.Frame(root)
+        self.canvas_frame.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
 
+        # Cho row 0 và cột 0 mở rộng
+        root.grid_rowconfigure(0, weight=1)
+        root.grid_columnconfigure(0, weight=1)
         # Canvas vẽ mê cung
         self.canvas = tk.Canvas(root, width=canvas_w, height=canvas_h, bg="white")
         self.canvas.grid(row=0, column=0, columnspan=3)
@@ -39,7 +45,7 @@ class MazeApp:
                            if f.endswith(".py") and f != "__init__.py"]
         self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
         self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
-        self.algo_menu.grid(row=3, column=0, sticky="w", padx=5, pady=5)
+        self.algo_menu.grid(row=2, column=1, sticky="w", padx=5, pady=5)
 
         # Panel phải
         self.right_panel = tk.Frame(root)
