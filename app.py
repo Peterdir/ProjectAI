@@ -26,7 +26,7 @@ class MazeApp:
         self.reset_btn.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
 
         self.random_maze_btn = tk.Button(root, text="Random Mê Cung", command=self.random_maze)
-        self.random_maze_btn.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+        self.random_maze_btn.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
 
         self.toggle_grid_var = tk.BooleanVar(value=True)
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
@@ -39,38 +39,53 @@ class MazeApp:
                            if f.endswith(".py") and f != "__init__.py"]
         self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
         self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
-        self.algo_menu.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+        self.algo_menu.grid(row=3, column=0, sticky="w", padx=5, pady=5)
 
         # Panel phải
         self.right_panel = tk.Frame(root)
-        self.right_panel.grid(row=0, column=3, rowspan=2, sticky="ns", padx=(5, 5), pady=5)
+        self.right_panel.grid(row=0, column=3, rowspan=2, sticky="nsew", padx=5, pady=5)
 
-        # Bảng hiển thị chỉ số thuật toán
+        # Cho cột 3 mở rộng
+        root.grid_columnconfigure(3, weight=1)
+        root.grid_rowconfigure(0, weight=1)
+
+        # -------- Bảng hiển thị chỉ số thuật toán --------
+        metrics_frame = tk.Frame(self.right_panel)
+        metrics_frame.pack(fill="both", expand=True)
+
         self.metrics_tree = ttk.Treeview(
-            self.right_panel,
+            metrics_frame,
             columns=("metric", "value"),
             show="headings",
-            height=15,
         )
         self.metrics_tree.heading("metric", text="Chỉ số")
         self.metrics_tree.heading("value", text="Giá trị")
         self.metrics_tree.column("metric", width=160, anchor="w")
         self.metrics_tree.column("value", width=180, anchor="center")
 
-        metrics_scrollbar = ttk.Scrollbar(self.right_panel, orient="vertical", command=self.metrics_tree.yview)
+        metrics_scrollbar = ttk.Scrollbar(metrics_frame, orient="vertical", command=self.metrics_tree.yview)
         self.metrics_tree.configure(yscrollcommand=metrics_scrollbar.set)
 
-        self.metrics_tree.pack(side="top", fill="both", expand=True)
+        self.metrics_tree.pack(side="left", fill="both", expand=True)
         metrics_scrollbar.pack(side="right", fill="y")
 
-        # Seed log
-        tk.Label(self.right_panel, text="Lịch sử Seed").pack(pady=(10, 0))
-        self.seed_listbox = tk.Listbox(self.right_panel, height=10)
-        self.seed_listbox.pack(fill="both", expand=False, padx=5, pady=5)
+        # -------- Seed log với scrollbar --------
+        seed_frame = tk.Frame(self.right_panel)
+        seed_frame.pack(fill="both", expand=True, pady=(10, 0))
+
+        tk.Label(seed_frame, text="Lịch sử Seed").pack(anchor="w")
+
+        self.seed_listbox = tk.Listbox(seed_frame)
+        self.seed_listbox.pack(side="left", fill="both", expand=True)
+
+        seed_scrollbar = tk.Scrollbar(seed_frame, orient="vertical", command=self.seed_listbox.yview)
+        seed_scrollbar.pack(side="right", fill="y")
+
+        self.seed_listbox.config(yscrollcommand=seed_scrollbar.set)
 
         # Label seed hiện tại
         self.current_seed_label = tk.Label(self.right_panel, text="Seed hiện tại: None")
-        self.current_seed_label.pack(pady=(5, 10))
+        self.current_seed_label.pack(pady=(5, 10), anchor="w")
 
         # Double click chọn seed
         self.seed_listbox.bind("<Double-1>", self.on_seed_double_click)
@@ -237,15 +252,12 @@ class MazeApp:
         global MAZE, START, GOAL, ROWS, COLS
         ROWS, COLS = 21, 31
 
-        # Tạo ma trận đầy tường
         maze = [[1 for _ in range(COLS)] for _ in range(ROWS)]
 
-        # Seed để tái tạo cùng mê cung
         if seed is None:
             seed = np.random.randint(0, 10**9)
         self.seed = seed
         np.random.seed(seed)
-        print(f"Seed dùng để sinh mê cung: {seed}")
 
         def carve_passages_from(r, c):
             directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
@@ -257,26 +269,22 @@ class MazeApp:
                     maze[nr][nc] = 0
                     carve_passages_from(nr, nc)
 
-        # Bắt đầu carving
         maze[0][0] = 0
         carve_passages_from(0, 0)
 
-        # **Tạo thêm các đường phụ ngẫu nhiên để thoáng hơn**
-        extra_paths = int(ROWS * COLS * 0.2)  # 20% số ô có thể phá tường
+        extra_paths = int(ROWS * COLS * 0.2) 
         for _ in range(extra_paths):
             r, c = np.random.randint(0, ROWS), np.random.randint(0, COLS)
             if maze[r][c] == 1:
-                # Chỉ phá tường nếu không phá đường chính
                 neighbors = 0
                 for dr, dc in [(0,1),(1,0),(0,-1),(-1,0)]:
                     nr, nc = r + dr, c + dc
                     if 0 <= nr < ROWS and 0 <= nc < COLS:
                         if maze[nr][nc] == 0:
                             neighbors += 1
-                if neighbors >= 1:  # ít nhất 1 đường nối ra ngoài
+                if neighbors >= 1:  
                     maze[r][c] = 0
 
-        # Start và Goal
         START = (0, 0)
         GOAL = (ROWS - 1, COLS - 1)
         maze[START[0]][START[1]] = 0
@@ -289,7 +297,6 @@ class MazeApp:
         self.draw_maze()
         self.draw_player()
 
-        # Cập nhật seed log + label
         self.seed_listbox.insert("end", str(seed))
         self.current_seed_label.config(text=f"Seed hiện tại: {seed}")
 
