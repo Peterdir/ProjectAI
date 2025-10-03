@@ -26,7 +26,7 @@ class MazeApp:
         self.reset_btn.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
 
         self.random_maze_btn = tk.Button(root, text="Random Mê Cung", command=self.random_maze)
-        self.random_maze_btn.grid(row=4, column=0, sticky="ew", padx=5, pady=5)
+        self.random_maze_btn.grid(row=2, column=1, sticky="ew", padx=5, pady=5)
 
         self.toggle_grid_var = tk.BooleanVar(value=True)
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
@@ -66,14 +66,23 @@ class MazeApp:
         self.metrics_tree.pack(side="top", fill="both", expand=True)
         metrics_scrollbar.pack(side="right", fill="y")
 
-        # Seed log
-        tk.Label(self.right_panel, text="Lịch sử Seed").pack(pady=(10, 0))
-        self.seed_listbox = tk.Listbox(self.right_panel, height=10)
-        self.seed_listbox.pack(fill="both", expand=False, padx=5, pady=5)
+        # Seed log với scrollbar
+        tk.Label(self.right_panel, text="Lịch sử Seed").pack(pady=(10, 0), anchor="w")
+
+        seed_frame = tk.Frame(self.right_panel)
+        seed_frame.pack(fill="both", expand=False, padx=5, pady=5)
+
+        self.seed_listbox = tk.Listbox(seed_frame, height=10)
+        self.seed_listbox.pack(side="left", fill="both", expand=True)
+
+        seed_scrollbar = tk.Scrollbar(seed_frame, orient="vertical", command=self.seed_listbox.yview)
+        seed_scrollbar.pack(side="right", fill="y")
+
+        self.seed_listbox.config(yscrollcommand=seed_scrollbar.set)
 
         # Label seed hiện tại
         self.current_seed_label = tk.Label(self.right_panel, text="Seed hiện tại: None")
-        self.current_seed_label.pack(pady=(5, 10))
+        self.current_seed_label.pack(pady=(5, 10), anchor="w")
 
         # Double click chọn seed
         self.seed_listbox.bind("<Double-1>", self.on_seed_double_click)
