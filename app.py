@@ -13,13 +13,7 @@ class MazeApp:
         root.state("zoomed")
         canvas_w = COLS * CELL_SIZE
         canvas_h = ROWS * CELL_SIZE
-        # Frame chứa canvas
-        self.canvas_frame = tk.Frame(root)
-        self.canvas_frame.grid(row=0, column=0, columnspan=3, sticky="nsew", padx=5, pady=5)
-
-        # Cho row 0 và cột 0 mở rộng
-        root.grid_rowconfigure(0, weight=1)
-        root.grid_columnconfigure(0, weight=1)
+        
         # Canvas vẽ mê cung
         self.canvas = tk.Canvas(root, width=canvas_w, height=canvas_h, bg="white")
         self.canvas.grid(row=0, column=0, columnspan=3)
