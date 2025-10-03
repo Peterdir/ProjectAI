@@ -17,7 +17,7 @@ class MazeApp:
         # Canvas vẽ mê cung
         self.canvas = tk.Canvas(root, width=canvas_w, height=canvas_h, bg="white")
         self.canvas.grid(row=0, column=0, columnspan=3)
-
+        
         # Nút điều khiển
         self.show_btn = tk.Button(root, text="Show Solution", command=self.show_solution)
         self.show_btn.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
@@ -40,6 +40,9 @@ class MazeApp:
         self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
         self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
         self.algo_menu.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+
+        # Cờ kiểm tra thuật toán đã chạy hay chưa
+        self.algo_ran = False 
 
         # Panel phải
         self.right_panel = tk.Frame(root)
@@ -80,6 +83,9 @@ class MazeApp:
         self.player_img = ImageTk.PhotoImage(Image.open("assets/player.png").resize((CELL_SIZE, CELL_SIZE)))
         self.goal_img = ImageTk.PhotoImage(Image.open("assets/goal.png").resize((CELL_SIZE, CELL_SIZE)))
 
+        # Maze mặc định load từ config
+        self.maze = MAZE
+
         # Trạng thái game
         self.player = START
         self.solution = None
@@ -101,13 +107,25 @@ class MazeApp:
         root.bind("a", lambda e: self.move_player(0, -1))
         root.bind("d", lambda e: self.move_player(0, 1))
 
+    # helper: bật/tắt một số control khi thuật toán chạy
+    def _set_controls_enabled(self, enabled: bool):
+        state = "normal" if enabled else "disabled"
+        try:
+            self.show_btn.config(state=state)
+            self.random_maze_btn.config(state=state)
+            # OptionMenu là Menubutton, có thể disable
+            self.algo_menu.config(state=state)
+        except Exception:
+            pass
+        # seed_listbox xử lý bằng check trong handler (đã có kiểm tra self.running)
+
     def draw_maze(self):
         self.canvas.delete("all")
         for r in range(ROWS):
             for c in range(COLS):
                 x0, y0 = c * CELL_SIZE, r * CELL_SIZE
                 x1, y1 = x0 + CELL_SIZE, y0 + CELL_SIZE
-                if MAZE[r][c] == 1:
+                if self.maze[r][c] == 1:
                     self.canvas.create_image(x0, y0, image=self.wall_img, anchor="nw")
                 else:
                     self.canvas.create_rectangle(x0, y0, x1, y1, fill=PATH_COLOR, outline=PATH_COLOR)
@@ -138,7 +156,7 @@ class MazeApp:
 
     def move_player(self, dr, dc):
         nr, nc = self.player[0] + dr, self.player[1] + dc
-        if 0 <= nr < ROWS and 0 <= nc < COLS and MAZE[nr][nc] == 0:
+        if 0 <= nr < ROWS and 0 <= nc < COLS and self.maze[nr][nc] == 0:
             self.player = (nr, nc)
             self.draw_maze()
             if self.player == GOAL:
@@ -153,54 +171,86 @@ class MazeApp:
             tk.messagebox.showwarning("Chưa có thuật toán", "Không tìm thấy thuật toán nào.")
             return
 
-        algorithm = load_algorithm(algo_name)
-        self.running = True
-
-        def callback(pos):
-            if not self.running:
-                return
-            self.highlight_cell(pos, color="blue")
-
-        def metrics_callback(stats, highlight_keys):
-            if self.running:
-                self.update_metrics_live(stats, highlight_keys)
-
-        path, metrics = algorithm(MAZE, self.player, GOAL,
-                                  callback=callback,
-                                  update_callback=metrics_callback)
-
-        if not self.running:
-            return
-        if not path:
-            tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
-            return
-
-        self.update_metrics_table(metrics)
-        self.solution = path
-        self.showing_solution = True
-
-        for r, c in path:
-            if not self.running: break
-            self.highlight_cell((r, c), color="green")
-            self.canvas.update()
-            self.canvas.after(50)
-
-        for r, c in path:
-            if not self.running: break
-            self.player = (r, c)
-            self.draw_player()
-            self.canvas.update()
-            self.canvas.after(100)
-
+        # Nếu có thuật toán đang chạy thì báo lỗi và từ chối thực thi
         if self.running:
-            self.on_win()
-        self.running = False
+            tk.messagebox.showerror("Đang chạy", "Một thuật toán đang chạy — vui lòng đợi hoặc nhấn Reset.")
+            return
+
+        # Nếu đã có solution từ lần chạy trước mà chưa reset -> yêu cầu reset trước
+        if self.solution is not None and not self.showing_solution:
+            tk.messagebox.showerror(
+                "Lỗi!",
+                "Bạn đã chạy thuật toán trước đó. Vui lòng bấm Reset trước khi chạy thuật toán khác."
+            )
+            return
+
+        algorithm = load_algorithm(algo_name)
+
+        # Khoá control, đánh dấu đang chạy
+        self.running = True
+        self._set_controls_enabled(False)
+
+        try:
+            def callback(pos):
+                if not self.running:
+                    return
+                self.highlight_cell(pos, color="blue")
+
+            def metrics_callback(stats, highlight_keys):
+                if self.running:
+                    self.update_metrics_live(stats, highlight_keys)
+
+            # Chạy thuật toán (hàm algorithm phải trả về (path, metrics))
+            path, metrics = algorithm(self.maze, self.player, GOAL,
+                                      callback=callback,
+                                      update_callback=metrics_callback)
+
+            if not self.running:
+                return  # nếu bị huỷ bởi reset trong lúc chạy
+
+            if not path:
+                tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
+                return
+
+            self.update_metrics_table(metrics)
+            self.solution = path
+            self.showing_solution = True
+
+            for r, c in path:
+                if not self.running:
+                    break
+                self.highlight_cell((r, c), color="green")
+                self.canvas.update()
+                self.canvas.after(50)
+
+            for r, c in path:
+                if not self.running:
+                    break
+                self.player = (r, c)
+                self.draw_player()
+                self.canvas.update()
+                self.canvas.after(100)
+
+            if self.running:
+                self.on_win()
+
+        finally:
+            # luôn bật lại control và clear flag running
+            self.running = False
+            self._set_controls_enabled(True)
 
     def reset_player(self):
-        self.running = False
+        # Nếu đang chạy, huỷ / dừng trước khi reset
+        if self.running:
+            # đặt running=False để callback/loop kiểm tra và dừng sớm
+            self.running = False
+
         self.player = START
         self.solution = None
         self.showing_solution = False
+        self.algo_ran = False
+        # Bật lại control phòng trường hợp bị khoá
+        self._set_controls_enabled(True)
         self.draw_maze()
 
     def highlight_cell(self, pos, color="yellow"):
@@ -233,8 +283,7 @@ class MazeApp:
         self.metrics_tree.update()
 
     def random_maze(self, seed=None):
-        import numpy as np
-        global MAZE, START, GOAL, ROWS, COLS
+        global START, GOAL, ROWS, COLS
         ROWS, COLS = 21, 31
 
         # Tạo ma trận đầy tường
@@ -262,18 +311,17 @@ class MazeApp:
         carve_passages_from(0, 0)
 
         # **Tạo thêm các đường phụ ngẫu nhiên để thoáng hơn**
-        extra_paths = int(ROWS * COLS * 0.2)  # 20% số ô có thể phá tường
+        extra_paths = int(ROWS * COLS * 0.2)
         for _ in range(extra_paths):
             r, c = np.random.randint(0, ROWS), np.random.randint(0, COLS)
             if maze[r][c] == 1:
-                # Chỉ phá tường nếu không phá đường chính
                 neighbors = 0
                 for dr, dc in [(0,1),(1,0),(0,-1),(-1,0)]:
                     nr, nc = r + dr, c + dc
                     if 0 <= nr < ROWS and 0 <= nc < COLS:
                         if maze[nr][nc] == 0:
                             neighbors += 1
-                if neighbors >= 1:  # ít nhất 1 đường nối ra ngoài
+                if neighbors >= 1:
                     maze[r][c] = 0
 
         # Start và Goal
@@ -281,8 +329,8 @@ class MazeApp:
         GOAL = (ROWS - 1, COLS - 1)
         maze[START[0]][START[1]] = 0
         maze[GOAL[0]][GOAL[1]] = 0
-        MAZE = maze
 
+        self.maze = maze  # cập nhật maze của class
         self.player = START
         self.solution = None
         self.showing_solution = False
@@ -294,7 +342,7 @@ class MazeApp:
         self.current_seed_label.config(text=f"Seed hiện tại: {seed}")
 
     def on_seed_double_click(self, event):
-        if self.running:  # Nếu đang chạy thuật toán thì không đổi seed
+        if self.running:
             tk.messagebox.showwarning("Đang chạy", "Vui lòng đợi thuật toán kết thúc trước khi đổi seed.")
             return
 
@@ -302,4 +350,3 @@ class MazeApp:
         if selection:
             seed = int(self.seed_listbox.get(selection[0]))
             self.random_maze(seed)
-

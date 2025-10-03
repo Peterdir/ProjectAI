@@ -6,3 +6,4 @@ if __name__ == "__main__":
     app = MazeApp(root)
     root.resizable(False, False)
     root.mainloop()
+    
