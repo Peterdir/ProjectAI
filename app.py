@@ -233,10 +233,14 @@ class MazeApp:
         self.metrics_tree.update()
 
     def random_maze(self, seed=None):
+        import numpy as np
         global MAZE, START, GOAL, ROWS, COLS
         ROWS, COLS = 21, 31
+
+        # Tạo ma trận đầy tường
         maze = [[1 for _ in range(COLS)] for _ in range(ROWS)]
 
+        # Seed để tái tạo cùng mê cung
         if seed is None:
             seed = np.random.randint(0, 10**9)
         self.seed = seed
@@ -253,9 +257,26 @@ class MazeApp:
                     maze[nr][nc] = 0
                     carve_passages_from(nr, nc)
 
+        # Bắt đầu carving
         maze[0][0] = 0
         carve_passages_from(0, 0)
 
+        # **Tạo thêm các đường phụ ngẫu nhiên để thoáng hơn**
+        extra_paths = int(ROWS * COLS * 0.2)  # 20% số ô có thể phá tường
+        for _ in range(extra_paths):
+            r, c = np.random.randint(0, ROWS), np.random.randint(0, COLS)
+            if maze[r][c] == 1:
+                # Chỉ phá tường nếu không phá đường chính
+                neighbors = 0
+                for dr, dc in [(0,1),(1,0),(0,-1),(-1,0)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < ROWS and 0 <= nc < COLS:
+                        if maze[nr][nc] == 0:
+                            neighbors += 1
+                if neighbors >= 1:  # ít nhất 1 đường nối ra ngoài
+                    maze[r][c] = 0
+
+        # Start và Goal
         START = (0, 0)
         GOAL = (ROWS - 1, COLS - 1)
         maze[START[0]][START[1]] = 0
