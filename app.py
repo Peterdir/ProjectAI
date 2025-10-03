@@ -294,7 +294,12 @@ class MazeApp:
         self.current_seed_label.config(text=f"Seed hiện tại: {seed}")
 
     def on_seed_double_click(self, event):
+        if self.running:  # Nếu đang chạy thuật toán thì không đổi seed
+            tk.messagebox.showwarning("Đang chạy", "Vui lòng đợi thuật toán kết thúc trước khi đổi seed.")
+            return
+
         selection = self.seed_listbox.curselection()
         if selection:
             seed = int(self.seed_listbox.get(selection[0]))
             self.random_maze(seed)
+
