@@ -30,7 +30,7 @@ class MazeApp:
 
         self.toggle_grid_var = tk.BooleanVar(value=True)
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
-                                       var=self.toggle_grid_var, command=self.draw_maze)
+                                       var=self.toggle_grid_var, command=self.toggle_grid_display)
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
 
         # Load danh sách thuật toán
@@ -141,9 +141,9 @@ class MazeApp:
 
         if self.toggle_grid_var.get():
             for r in range(ROWS + 1):
-                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR)
+                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR,tag="grid_line")
             for c in range(COLS + 1):
-                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR)
+                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR,tag="grid_line")
 
         gr, gc = GOAL
         self.canvas.create_image(gc * CELL_SIZE, gr * CELL_SIZE, image=self.goal_img, anchor="nw")
@@ -154,7 +154,7 @@ class MazeApp:
                     continue
                 x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
                 x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill=SOLUTION_COLOR, outline="")
+                # self.canvas.create_rectangle(x0, y0, x1, y1, fill=SOLUTION_COLOR, outline="")
 
         self.draw_player()
 
@@ -359,3 +359,14 @@ class MazeApp:
         if selection:
             seed = int(self.seed_listbox.get(selection[0]))
             self.random_maze(seed)
+    # Thêm hàm mới này vào class MazeApp
+    def toggle_grid_display(self):
+        if self.toggle_grid_var.get():
+            # Vẽ lại lưới nếu đang bật
+            for r in range(ROWS + 1):
+                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR, tags="grid_line")
+            for c in range(COLS + 1):
+                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR, tags="grid_line")
+        else:
+            # Xóa tất cả các đối tượng có tag "grid_line"
+            self.canvas.delete("grid_line")
