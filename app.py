@@ -263,14 +263,50 @@ class MazeApp:
         self.draw_maze()
 
     def highlight_cell(self, pos, color="yellow"):
-        r, c = pos
-        if (r, c) == START or (r, c) == GOAL:
+        # --- Trường hợp 1: Cho các thuật toán thường (1 tọa độ) ---
+        if not isinstance(pos, (set, frozenset)):
+            r, c = pos
+            if (r, c) == START or (r, c) == GOAL:
+                return
+            x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
+            x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
+            self.canvas.update_idletasks()
             return
-        x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
-        x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
-        self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
-        self.canvas.update()
-        self.canvas.after(1)
+
+        # --- Trường hợp 2: Belief State (no observation) ---
+        # Dùng cache để tránh vẽ lại toàn bộ mỗi frame
+        if not hasattr(self, "_last_belief_state"):
+            self._last_belief_state = set()
+
+        current = set(pos)
+        last = self._last_belief_state
+
+        # Tính những ô cần thêm và cần xóa
+        to_add = current - last
+        to_remove = last - current
+
+        # Xóa ô không còn trong belief
+        for r, c in to_remove:
+            tag = f"b_{r}_{c}"
+            self.canvas.delete(tag)
+
+        # Vẽ ô mới thêm vào
+        for r, c in to_add:
+            if (r, c) == START or (r, c) == GOAL:
+                continue
+            x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
+            x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
+            tag = f"b_{r}_{c}"
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="", tags=tag)
+
+        self._last_belief_state = current
+
+        # Giảm số lần cập nhật để Tkinter không nghẽn
+        self._frame_counter = getattr(self, "_frame_counter", 0) + 1
+        if self._frame_counter % 10 == 0:  # Cập nhật mỗi 10 khung
+            self.canvas.update_idletasks()
+
 
     def update_metrics_table(self, metrics):
         for item in self.metrics_tree.get_children():
