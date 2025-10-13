@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox, ttk
 import os
 import numpy as np
+import time
 
 class MazeApp:
     def __init__(self, root):
@@ -30,7 +31,7 @@ class MazeApp:
 
         self.toggle_grid_var = tk.BooleanVar(value=True)
         self.grid_btn = tk.Checkbutton(root, text="Grid lines",
-                                       var=self.toggle_grid_var, command=self.draw_maze)
+                                       var=self.toggle_grid_var, command=self.toggle_grid_display)
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
 
         # Load danh sách thuật toán
@@ -118,15 +119,31 @@ class MazeApp:
 
     # helper: bật/tắt một số control khi thuật toán chạy
     def _set_controls_enabled(self, enabled: bool):
-        state = "normal" if enabled else "disabled"
+        """
+        Khi enabled=True: bật toàn bộ controls (kể cả reset)
+        Khi enabled=False: tắt controls chính (show, random, menu, grid) nhưng giữ Reset enabled
+        """
         try:
+            state = "normal" if enabled else "disabled"
             self.show_btn.config(state=state)
             self.random_maze_btn.config(state=state)
-            # OptionMenu là Menubutton, có thể disable
             self.algo_menu.config(state=state)
+            self.grid_btn.config(state=state)
+            # reset luôn được phép
+            self.reset_btn.config(state="normal")
         except Exception:
             pass
-        # seed_listbox xử lý bằng check trong handler (đã có kiểm tra self.running)
+
+    def _lock_after_run(self):
+        """Sau khi đã chạy xong 1 thuật toán: disable mọi thứ trừ Reset."""
+        try:
+            self.show_btn.config(state="disabled")
+            self.random_maze_btn.config(state="disabled")
+            self.algo_menu.config(state="disabled")
+            self.grid_btn.config(state="disabled")
+            self.reset_btn.config(state="normal")
+        except Exception:
+            pass
 
     def draw_maze(self):
         self.canvas.delete("all")
@@ -141,9 +158,9 @@ class MazeApp:
 
         if self.toggle_grid_var.get():
             for r in range(ROWS + 1):
-                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR)
+                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR,tag="grid_line")
             for c in range(COLS + 1):
-                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR)
+                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR,tag="grid_line")
 
         gr, gc = GOAL
         self.canvas.create_image(gc * CELL_SIZE, gr * CELL_SIZE, image=self.goal_img, anchor="nw")
@@ -154,7 +171,7 @@ class MazeApp:
                     continue
                 x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
                 x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
-                self.canvas.create_rectangle(x0, y0, x1, y1, fill=SOLUTION_COLOR, outline="")
+                # self.canvas.create_rectangle(x0, y0, x1, y1, fill=SOLUTION_COLOR, outline="")
 
         self.draw_player()
 
@@ -178,6 +195,14 @@ class MazeApp:
         algo_name = self.selected_algo.get()
         if not algo_name:
             tk.messagebox.showwarning("Chưa có thuật toán", "Không tìm thấy thuật toán nào.")
+            return
+
+        # Nếu đã chạy thuật toán trước đó mà chưa Reset -> chặn
+        if self.algo_ran:
+            tk.messagebox.showerror(
+                "Cảnh báo",
+                "Bạn đã chạy thuật toán rồi. Vui lòng bấm Reset trước khi chạy thuật toán khác."
+            )
             return
 
         # Nếu có thuật toán đang chạy thì báo lỗi và từ chối thực thi
@@ -221,9 +246,14 @@ class MazeApp:
                 tk.messagebox.showwarning("Không có đường", "Không tìm thấy đường từ vị trí hiện tại.")
                 return
 
+            # Cập nhật bảng thống kê
             self.update_metrics_table(metrics)
             self.solution = path
             self.showing_solution = True
+            # KHÓA: đánh dấu thuật toán đã chạy xong (bắt phải Reset mới chạy tiếp)
+            self.algo_ran = True
+            # Khoá controls trừ reset
+            self._lock_after_run()
 
             for r, c in path:
                 if not self.running:
@@ -244,9 +274,8 @@ class MazeApp:
                 self.on_win()
 
         finally:
-            # luôn bật lại control và clear flag running
+            # luôn clear flag running (controls đã được set tùy theo algo_ran)
             self.running = False
-            self._set_controls_enabled(True)
 
     def reset_player(self):
         # Nếu đang chạy, huỷ / dừng trước khi reset
@@ -258,19 +287,55 @@ class MazeApp:
         self.solution = None
         self.showing_solution = False
         self.algo_ran = False
-        # Bật lại control phòng trường hợp bị khoá
+        # Bật lại toàn bộ controls
         self._set_controls_enabled(True)
         self.draw_maze()
 
     def highlight_cell(self, pos, color="yellow"):
-        r, c = pos
-        if (r, c) == START or (r, c) == GOAL:
+        # --- Trường hợp 1: Cho các thuật toán thường (1 tọa độ) ---
+        if not isinstance(pos, (set, frozenset)):
+            r, c = pos
+            if (r, c) == START or (r, c) == GOAL:
+                return
+            x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
+            x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
+            self.canvas.update_idletasks()
             return
-        x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
-        x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
-        self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="")
-        self.canvas.update()
-        self.canvas.after(1)
+
+        # --- Trường hợp 2: Belief State (no observation) ---
+        # Dùng cache để tránh vẽ lại toàn bộ mỗi frame
+        if not hasattr(self, "_last_belief_state"):
+            self._last_belief_state = set()
+
+        current = set(pos)
+        last = self._last_belief_state
+
+        # Tính những ô cần thêm và cần xóa
+        to_add = current - last
+        to_remove = last - current
+
+        # Xóa ô không còn trong belief
+        for r, c in to_remove:
+            tag = f"b_{r}_{c}"
+            self.canvas.delete(tag)
+
+        # Vẽ ô mới thêm vào
+        for r, c in to_add:
+            if (r, c) == START or (r, c) == GOAL:
+                continue
+            x0, y0 = c * CELL_SIZE + 3, r * CELL_SIZE + 3
+            x1, y1 = (c + 1) * CELL_SIZE - 3, (r + 1) * CELL_SIZE - 3
+            tag = f"b_{r}_{c}"
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="", tags=tag)
+
+        self._last_belief_state = current
+
+        # Giảm số lần cập nhật để Tkinter không nghẽn
+        self._frame_counter = getattr(self, "_frame_counter", 0) + 1
+        if self._frame_counter % 10 == 0:  # Cập nhật mỗi 10 khung
+            self.canvas.update_idletasks()
+
 
     def update_metrics_table(self, metrics):
         for item in self.metrics_tree.get_children():
@@ -290,6 +355,17 @@ class MazeApp:
             if key in highlight_keys:
                 self.metrics_tree.item(iid, tags=("highlight"))
         self.metrics_tree.update()
+
+    def add_seed_to_history(self, seed):
+        """Thêm seed vào history: nếu trùng thì bỏ bản cũ rồi thêm xuống cuối."""
+        seeds = list(self.seed_listbox.get(0, tk.END))
+        s = str(seed)
+        if s in seeds:
+            idx = seeds.index(s)
+            self.seed_listbox.delete(idx)
+        self.seed_listbox.insert(tk.END, s)
+        # Cập nhật label
+        self.current_seed_label.config(text=f"Seed hiện tại: {seed}")
 
     def random_maze(self, seed=None):
         global START, GOAL, ROWS, COLS
@@ -346,9 +422,8 @@ class MazeApp:
         self.draw_maze()
         self.draw_player()
 
-        # Cập nhật seed log + label
-        self.seed_listbox.insert("end", str(seed))
-        self.current_seed_label.config(text=f"Seed hiện tại: {seed}")
+        # Cập nhật seed log + label (không thêm trùng, đưa seed vừa dùng xuống cuối)
+        self.add_seed_to_history(seed)
 
     def on_seed_double_click(self, event):
         if self.running:
@@ -358,4 +433,19 @@ class MazeApp:
         selection = self.seed_listbox.curselection()
         if selection:
             seed = int(self.seed_listbox.get(selection[0]))
+            # Sinh lại mê cung từ seed được chọn
             self.random_maze(seed)
+            # Đưa seed lên cuối (most recently used)
+            self.add_seed_to_history(seed)
+
+    # Thêm hàm mới này vào class MazeApp
+    def toggle_grid_display(self):
+        if self.toggle_grid_var.get():
+            # Vẽ lại lưới nếu đang bật
+            for r in range(ROWS + 1):
+                self.canvas.create_line(0, r * CELL_SIZE, COLS * CELL_SIZE, r * CELL_SIZE, fill=GRID_LINE_COLOR, tags="grid_line")
+            for c in range(COLS + 1):
+                self.canvas.create_line(c * CELL_SIZE, 0, c * CELL_SIZE, ROWS * CELL_SIZE, fill=GRID_LINE_COLOR, tags="grid_line")
+        else:
+            # Xóa tất cả các đối tượng có tag "grid_line"
+            self.canvas.delete("grid_line")
