@@ -1,7 +1,7 @@
 import time
 
 def check_valid(r, c, R, C, maze):
-    return 0 <= r < R and 0 <= c <= C and maze[r][c] == 0
+    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0
 
 
 def heuristic(a, b):
@@ -10,7 +10,7 @@ def heuristic(a, b):
 
 def find_path(maze, start, goal, callback = None, update_callback=None):
     R, C = len(maze), len(maze[0])
-    dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+    dirs = [(-1,0),(1,0),(0,-1),(0,1)]  
     current_state = start
     current_heuristic = heuristic(start, goal)
     path = [start]
@@ -55,5 +55,3 @@ def find_path(maze, start, goal, callback = None, update_callback=None):
             current_heuristic = next_heuristic
         else:
             return (path, stats) if current_state == goal else (None, stats)
-    # unreachable
-    return (path, stats) if current_state == goal else (None, stats)
