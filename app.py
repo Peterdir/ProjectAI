@@ -35,12 +35,44 @@ class MazeApp:
         self.grid_btn.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
 
         # Load danh sách thuật toán
-        algo_dir = "helpers/algorithms"
-        self.algorithms = [f[:-3] for f in os.listdir(algo_dir)
-                           if f.endswith(".py") and f != "__init__.py"]
-        self.selected_algo = tk.StringVar(value=self.algorithms[0] if self.algorithms else "")
-        self.algo_menu = tk.OptionMenu(root, self.selected_algo, *self.algorithms)
+        from helpers.loader import discover_algorithms
+        algos = discover_algorithms()
+        self.selected_algo = tk.StringVar()
+
+        # Menubutton chính
+        self.algo_menu = tk.Menubutton(root, text="Chọn thuật toán", relief="raised")
         self.algo_menu.grid(row=2, column=0, sticky="w", padx=5, pady=5)
+
+        menu = tk.Menu(self.algo_menu, tearoff=0)
+        self.algo_menu["menu"] = menu
+
+        # Gom nhóm theo thư mục
+        grouped = {}
+        for key in algos.keys():
+            if "/" in key:
+                group, algo = key.split("/", 1)
+            else:
+                group, algo = "Khác", key
+            grouped.setdefault(group, []).append(algo)
+
+        # Tạo menu con cho từng nhóm
+        for group, names in grouped.items():
+            submenu = tk.Menu(menu, tearoff=0)
+            for name in names:
+                full_name = f"{group}/{name}" if group != "Khác" else name
+                submenu.add_radiobutton(
+                    label=name,
+                    variable=self.selected_algo,
+                    value=full_name
+                )
+            menu.add_cascade(label=group, menu=submenu)
+
+        # Chọn thuật toán đầu tiên mặc định
+        if grouped:
+            first_group = next(iter(grouped))
+            first_algo = grouped[first_group][0]
+            self.selected_algo.set(f"{first_group}/{first_algo}")
+
 
         # Cờ kiểm tra thuật toán đã chạy hay chưa
         self.algo_ran = False 
