@@ -7,6 +7,8 @@ from core.maze_generator import generate_random_maze
 from ui.maze_canvas import MazeCanvas
 from ui.sidebar import Sidebar
 from ui.controls_frame import ControlsFrame
+from ui.random_walls_toggle import RandomWallsToggle
+import random
 
 class MazeApp:
     def __init__(self, root):
@@ -54,7 +56,13 @@ class MazeApp:
         # Sidebar
         self.sidebar = Sidebar(main_frame, self.on_seed_double_click)
         self.sidebar.grid(row=0, column=1, rowspan=2, sticky="ns", padx=(10, 0))
-        
+
+        # Toggle thêm tường ngẫu nhiên
+        self.random_walls_toggle = RandomWallsToggle(
+            main_frame,
+            callback=lambda state: print("Random walls:", state)
+        )
+        self.random_walls_toggle.grid(row=2, column=0, sticky="w", pady=(10, 0))
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
@@ -75,16 +83,32 @@ class MazeApp:
         self.canvas.draw_player(self.player)
 
     def move_player(self, dr, dc):
-        if self.running or self.algo_ran: return
-        
+        if self.running or self.algo_ran:
+            return
+
         nr, nc = self.player[0] + dr, self.player[1] + dc
         rows, cols = len(self.maze), len(self.maze[0])
-        
+
         if 0 <= nr < rows and 0 <= nc < cols and self.maze[nr][nc] == 0:
             self.player = (nr, nc)
             self.canvas.draw_player(self.player)
+
+            # Nếu toggle được bật → thêm tường ngẫu nhiên
+            if self.random_walls_toggle.is_enabled():
+                self.add_random_walls(count=3)
+                self.full_redraw()
+
             if self.player == self.goal:
                 self.on_win()
+
+    def add_random_walls(self, count=3):
+        rows, cols = len(self.maze), len(self.maze[0])
+        added = 0
+        while added < count:
+            r, c = random.randint(0, rows - 1), random.randint(0, cols - 1)
+            if self.maze[r][c] == 0 and (r, c) not in [self.player, self.goal]:
+                self.maze[r][c] = 1
+                added += 1
 
     def on_win(self):
         messagebox.showinfo("Hoàn thành!", "Chúc mừng — bạn đã đến đích!")
