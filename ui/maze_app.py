@@ -9,7 +9,7 @@ from ui.sidebar import Sidebar
 from ui.controls_frame import ControlsFrame
 from ui.random_walls_toggle import RandomWallsToggle
 import random
-
+from ui.start_position_input import ask_start_position
 class MazeApp:
     def __init__(self, root):
         self.root = root
@@ -24,7 +24,7 @@ class MazeApp:
         self.running = False
         self.showing_solution = False
         self.algo_ran = False
-
+        
         # Khởi tạo UI
         self.setup_ui()
         self.bind_events()
@@ -42,6 +42,9 @@ class MazeApp:
         canvas_h = ROWS * CELL_SIZE
         self.canvas = MazeCanvas(main_frame, width=canvas_w, height=canvas_h)
         self.canvas.grid(row=0, column=0, sticky="nsew")
+                # Nút nhập toạ độ
+        set_start_btn = tk.Button(main_frame, text="Đặt vị trí bắt đầu", command=self.set_custom_start)
+        set_start_btn.grid(row=2, column=0, sticky="e", pady=(10, 0))
 
         # Controls
         control_callbacks = {
@@ -76,7 +79,7 @@ class MazeApp:
         self.root.bind("s", lambda e: self.move_player(1, 0))
         self.root.bind("a", lambda e: self.move_player(0, -1))
         self.root.bind("d", lambda e: self.move_player(0, 1))
-
+        self.canvas.bind("<Button-1>", self.on_canvas_click)
     def full_redraw(self):
         show_grid = self.controls.toggle_grid_var.get()
         self.canvas.draw_maze(self.maze, self.goal, show_grid)
@@ -224,3 +227,21 @@ class MazeApp:
 
     def toggle_grid_display(self):
         self.full_redraw()
+    def set_custom_start(self):
+        """Cho phép người dùng nhập toạ độ hoặc click chuột để đặt vị trí bắt đầu"""
+        pos = ask_start_position(self.root, self.maze)
+        if pos:
+            self.player = pos
+            self.full_redraw()
+
+    def on_canvas_click(self, event):
+        """Cho phép click lên mê cung để đổi vị trí bắt đầu"""
+        row = event.y // CELL_SIZE
+        col = event.x // CELL_SIZE
+        rows, cols = len(self.maze), len(self.maze[0])
+
+        if 0 <= row < rows and 0 <= col < cols and self.maze[row][col] == 0:
+            self.player = (row, col)
+            self.full_redraw()
+        else:
+            messagebox.showwarning("Không hợp lệ", "Ô này không thể chọn làm vị trí bắt đầu.")
