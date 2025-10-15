@@ -1,0 +1,2 @@
+
+    app = MazeApp(root)
