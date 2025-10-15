@@ -32,3 +32,5 @@ def find_path(maze, start, goal):
     visited.add(start)
     path.append(start)
     return path if backtrack(start[0], start[1]) else None
+
+

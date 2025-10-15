@@ -54,15 +54,3 @@ def find_path(maze, start, goal, alpha=0.99, min_temp=0.001, max_steps=5000):
         temperature*=alpha
     
     return None
-
-# ----- TEST -----
-maze = [
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 1, 0],
-    [0, 0, 0, 1, 0],
-    [1, 1, 0, 0, 0]
-]
-start = (0, 0)
-goal = (3, 4)
-path = find_path(maze, start, goal)
-print(path)
