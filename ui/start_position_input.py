@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from tkinter import messagebox  # vẫn dùng messagebox chuẩn được
-# (CTk không có messagebox riêng, nên dùng của tkinter cho thông báo là hợp lý)
+
+from CTkMessagebox import CTkMessagebox
 
 def ask_start_position(root, maze):
     """
@@ -37,15 +37,15 @@ def ask_start_position(root, maze):
         try:
             r, c = map(int, answer.split(","))
             if not (0 <= r < rows and 0 <= c < cols):
-                messagebox.showwarning("Sai toạ độ", "Toạ độ nằm ngoài mê cung.")
+                CTkMessagebox.showwarning("Sai toạ độ", "Toạ độ nằm ngoài mê cung.")
                 return
             if maze[r][c] == 1:
-                messagebox.showwarning("Không hợp lệ", "Ô này là tường.")
+                CTkMessagebox.showwarning("Không hợp lệ", "Ô này là tường.")
                 return
             result["value"] = (r, c)
             dialog.destroy()
         except:
-            messagebox.showerror("Lỗi nhập", "Vui lòng nhập đúng định dạng: hàng,cột (ví dụ: 3,5)")
+            CTkMessagebox.showerror("Lỗi nhập", "Vui lòng nhập đúng định dạng: hàng,cột (ví dụ: 3,5)")
 
     def on_cancel():
         dialog.destroy()
