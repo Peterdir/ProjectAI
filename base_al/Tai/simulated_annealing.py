@@ -52,7 +52,7 @@ def find_path(maze, start, goal, alpha=0.99, min_temp=0.001, max_steps=5000):
             if current == goal:
                 return path
         temperature*=alpha
-
+    
     return None
 
 # ----- TEST -----
