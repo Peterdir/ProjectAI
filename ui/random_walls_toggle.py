@@ -1,21 +1,19 @@
-# ui/random_walls_toggle.py
-import tkinter as tk
-from tkinter import ttk
+import customtkinter as ctk
 
-class RandomWallsToggle(tk.Frame):
+class RandomWallsToggle(ctk.CTkFrame):
     def __init__(self, master, callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.callback = callback
 
-        self.var = tk.BooleanVar(value=False)
-        self.check = ttk.Checkbutton(
+        self.var = ctk.BooleanVar(value=False)
+
+        self.switch = ctk.CTkSwitch(
             self,
             text="Thêm tường ngẫu nhiên khi di chuyển",
             variable=self.var,
-            command=self.on_toggle,
-            style="Switch.TCheckbutton"
+            command=self.on_toggle
         )
-        self.check.pack(anchor="w", padx=5, pady=5)
+        self.switch.pack(anchor="w", padx=5, pady=5)
 
     def on_toggle(self):
         """Kích hoạt callback khi người dùng bật/tắt."""

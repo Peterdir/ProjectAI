@@ -23,7 +23,7 @@ def discover_algorithms(base_path="helpers/algorithms"):
 
 def load_algorithm(name):
     """
-    name: ví dụ 'info/astar' hoặc 'noinfo/bfs'
+    name: ví dụ 'info-->astar' hoặc 'noinfo-->bfs'
     Trả về hàm find_path trong module tương ứng.
     """
     algos = discover_algorithms()
