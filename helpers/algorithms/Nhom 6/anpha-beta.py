@@ -1,11 +1,11 @@
 import math
 
-def find_path(maze, start, goal, callback=None, update_callback=None, max_depth=4):
+def find_path(maze, start, goal, callback=None, update_callback=None, max_depth=12):
     def heuristic(state):
         r, c = state
         gr, gc = goal
-        return abs(r - gr) + abs(c - gc)
-    
+        return abs(r - gr) + abs(c - gc)  # Manhattan
+
     def get_moves(state):
         r, c = state
         moves = []
@@ -15,65 +15,61 @@ def find_path(maze, start, goal, callback=None, update_callback=None, max_depth=
                 moves.append((nr, nc))
         return moves
 
-    def is_terminal(state, depth):
-        return depth == 0 or state == goal
+    def alphabeta(state, depth, alpha, beta, maximizing, path):
+        # Nếu đạt mục tiêu hoặc hết độ sâu → kết thúc, trả path
+        if state == goal or depth == 0:
+            return -heuristic(state), path + [state]
 
-    def alphabeta(state, depth, alpha, beta, maximizing):
-        if is_terminal(state, depth):
-            return -heuristic(state), state
-
-        best_state = None
-        if maximizing:  # agent move
-            value = -math.inf
+        if maximizing:  # Agent (người tìm đường)
+            best_score = -math.inf
+            best_path = None
             for move in get_moves(state):
-                score, _ = alphabeta(move, depth - 1, alpha, beta, False)
-                if score > value:
-                    value, best_state = score, move
-                alpha = max(alpha, value)
+                score, new_path = alphabeta(move, depth - 1, alpha, beta, False, path + [state])
+                if score > best_score:
+                    best_score = score
+                    best_path = new_path
+                alpha = max(alpha, best_score)
                 if alpha >= beta:
                     break
-            return value, best_state
-        else:  # opponent move (giả định gây bất lợi)
-            value = math.inf
+            return best_score, best_path
+
+        else:  # Opponent (giả lập cản đường)
+            worst_score = math.inf
+            worst_path = None
             for move in get_moves(state):
-                # Giả định đối thủ chọn hướng xa goal nhất
-                score, _ = alphabeta(move, depth - 1, alpha, beta, True)
-                if score < value:
-                    value, best_state = score, move
-                beta = min(beta, value)
+                score, new_path = alphabeta(move, depth - 1, alpha, beta, True, path + [state])
+                if score < worst_score:
+                    worst_score = score
+                    worst_path = new_path
+                beta = min(beta, worst_score)
                 if alpha >= beta:
                     break
-            return value, best_state
+            return worst_score, worst_path
 
-    # --- main ---
-    path = [start]
-    current = start
-    steps = 0
-    visited = set()
+    # MAIN EXECUTION
+    score, best_path = alphabeta(start, max_depth, -math.inf, math.inf, True, [])
 
-    for depth in range(max_depth):
-        steps += 1
-        visited.add(current)
-        _, next_state = alphabeta(current, max_depth, -math.inf, math.inf, True)
-        if not next_state or next_state == goal:
-            break
-        path.append(next_state)
-        current = next_state
+    if not best_path:
+        return [], {"Steps": 0, "Visited nodes": 0, "Path length": 0}
 
-        if update_callback:
-            update_callback({
-                "Steps": steps,
-                "Visited nodes": len(visited),
-                "Current position": current,
-                "Path length": len(path)
-            })
+    visited = set(best_path)
+    steps = len(best_path)
 
+    # Gọi callback để vẽ GUI mê cung (tkinter)
     if callback:
-        for pos in path:
+        for pos in best_path:
             callback(pos)
 
-    return path, {
+    # Gửi thông tin ra Sidebar
+    if update_callback:
+        update_callback({
+            "Steps": steps,
+            "Visited nodes": len(visited),
+            "Path length": len(best_path)
+        })
+
+    return best_path, {
         "Steps": steps,
         "Visited nodes": len(visited),
-        "Path length": len(path)
+        "Path length": len(best_path)
     }

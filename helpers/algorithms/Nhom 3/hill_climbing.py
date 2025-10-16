@@ -1,7 +1,7 @@
 import time
 
 def check_valid(r, c, R, C, maze):
-    return 0 <= r < R and 0 <= c <= C and maze[r][c] == 0
+    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0
 
 
 def heuristic(a, b):
