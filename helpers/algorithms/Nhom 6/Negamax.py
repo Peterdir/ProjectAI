@@ -2,13 +2,11 @@ import math
 import time
 
 def heuristic(state, goal):
-    """Khoảng cách Manhattan làm heuristic"""
     r, c = state
     gr, gc = goal
     return abs(r - gr) + abs(c - gc)
 
 def get_moves(state, maze):
-    """Danh sách các nước đi hợp lệ"""
     R, C = len(maze), len(maze[0])
     r, c = state
     moves = []
@@ -19,10 +17,6 @@ def get_moves(state, maze):
     return moves
 
 def negamax_to_goal(maze, state, goal, visited):
-    """
-    Negamax pathfinding đảm bảo tìm đến goal nếu có đường đi.
-    Trả về chi phí tối thiểu và đường đi tương ứng.
-    """
     if state == goal:
         return 0, [state]
 
@@ -30,7 +24,6 @@ def negamax_to_goal(maze, state, goal, visited):
     best_path = None
 
     for move in get_moves(state, maze):
-        # Nếu move chưa visited hoặc là bước đến goal
         if move not in visited or move == goal:
             score, path = negamax_to_goal(maze, move, goal, visited | {move})
             score += 1  # mỗi bước đi +1
@@ -42,9 +35,6 @@ def negamax_to_goal(maze, state, goal, visited):
     return best_score, best_path
 
 def find_path(maze, start, goal, callback=None, update_callback=None):
-    """
-    Wrapper Negamax pathfinding đảm bảo đến goal.
-    """
     t0 = time.time()
     score, path = negamax_to_goal(maze, start, goal, {start})
 
