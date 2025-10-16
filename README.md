@@ -77,13 +77,13 @@
   * **CustomTkinter** (GUI)
   * **CTkMessagebox** (thông báo cho GUI)
   * **Pillow** (xử lý ảnh PNG)
-
+  * **Numpy** (Random mê cung)
 ## 3. Cài đặt và chạy
 
 ```bash
 git clone https://github.com/Peterdir/ProjectAI/
-pip install pillow customtkinter
-pip install CTkMessagebox
+pip install pillow customtkinter CTkMessagebox numpy
+
 ```
 
 Chạy ứng dụng:
@@ -91,7 +91,7 @@ Chạy ứng dụng:
 * **Windows (PowerShell / CMD):**
 
 ```powershell
-python .app.py
+python app.py
 ```
 
 * **macOS / Linux:**
