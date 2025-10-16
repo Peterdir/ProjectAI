@@ -214,14 +214,12 @@ hoặc có thể nhập tọa độ thủ công với nút **Đặt vị trí b�
 
 ### Các thông báo phát sinh
 
-  - **Không thể thoát thuật toán khi đang chạy**: 
-  ![image](./image/cannot_exit.png)
-  - **Hoàn thành thuật toán**: 
-  ![image](./image/complete.png)
-  - **Không tìm thấy đường đi**: 
-  ![image](./image/not_found.png)
-  - **Xác nhận thoát app**: 
-  ![image](./image/comfirm_exit.png)
+<table>
+  <tr><td><b>Không thể thoát thuật toán khi đang chạy</b></td><td><img src="./image/cannot_exit.png" width="250"></td></tr>
+  <tr><td><b>Hoàn thành thuật toán</b></td><td><img src="./image/complete.png" width="250"></td></tr>
+  <tr><td><b>Không tìm thấy đường đi</b></td><td><img src="./image/not_found.png" width="250"></td></tr>
+  <tr><td><b>Xác nhận thoát app</b></td><td><img src="./image/comfirm_exit.png" width="250"></td></tr>
+</table>
 
 
 
