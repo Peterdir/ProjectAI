@@ -51,7 +51,8 @@ class MazeApp:
             "show_solution": self.show_solution,
             "reset": self.reset_app,
             "toggle_grid": self.toggle_grid_display,
-            "random_maze": self.random_maze
+            "random_maze": self.random_maze,
+            "change_size": self.change_maze_size,
         }
         self.controls = ControlsFrame(main_frame, control_callbacks)
         self.controls.grid(row=1, column=0, sticky="ew", pady=10)
@@ -201,17 +202,19 @@ class MazeApp:
 
     def random_maze(self, seed=None):
         global ROWS, COLS, START, GOAL
-        ROWS, COLS = 21, 31 # Có thể đưa ra config
-        
-        self.maze, self.player, self.goal, used_seed = generate_random_maze(ROWS, COLS, seed)
-        START, GOAL = self.player, self.goal # Cập nhật global config nếu cần
-        
+
+        rows, cols = len(self.maze), len(self.maze[0])
+
+        # Sinh mê cung mới theo đúng kích thước hiện tại
+        self.maze, self.player, self.goal, used_seed = generate_random_maze(rows, cols, seed)
+        START, GOAL = self.player, self.goal
+
         self.sidebar.add_seed_to_history(used_seed)
-        self.reset_app() # Reset trạng thái ứng dụng với mê cung mới
-        
-        # Cập nhật lại kích thước canvas
-        canvas_w = COLS * CELL_SIZE
-        canvas_h = ROWS * CELL_SIZE
+        self.reset_app()
+
+        # Cập nhật kích thước canvas
+        canvas_w = cols * CELL_SIZE
+        canvas_h = rows * CELL_SIZE
         self.canvas.config(width=canvas_w, height=canvas_h)
         self.full_redraw()
 
@@ -245,3 +248,52 @@ class MazeApp:
             self.full_redraw()
         else:
             messagebox.showwarning("Không hợp lệ", "Ô này không thể chọn làm vị trí bắt đầu.")
+
+    # Thay đổi kích thước mê cung
+    def change_maze_size(self, size_str):
+        """Thay đổi kích thước mê cung và canh lại giao diện"""
+        try:
+            rows, cols = map(int, size_str.lower().split("x"))
+        except ValueError:
+            messagebox.showerror("Lỗi", f"Kích thước không hợp lệ: {size_str}")
+            return
+
+        global ROWS, COLS, START, GOAL
+        ROWS, COLS = rows, cols
+
+        # --- Sinh lại mê cung mới ---
+        self.maze, start_pos, goal_pos, used_seed = generate_random_maze(ROWS, COLS)
+        START, GOAL = start_pos, goal_pos
+
+        # --- Đặt lại vị trí nhân vật về start mới ---
+        self.player = start_pos
+        self.goal = goal_pos
+
+        # --- Đảm bảo player và goal không bị tường bao ---
+        pr, pc = self.player
+        gr, gc = self.goal
+        self.maze[pr][pc] = 0
+        self.maze[gr][gc] = 0
+        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            rr, cc = gr + dr, gc + dc
+            if 0 <= rr < ROWS and 0 <= cc < COLS:
+                self.maze[rr][cc] = 0
+
+        # --- Cập nhật kích thước canvas ---
+        canvas_w = COLS * CELL_SIZE
+        canvas_h = ROWS * CELL_SIZE
+        self.canvas.config(width=canvas_w, height=canvas_h)
+
+        # --- Reset giao diện nhưng giữ player ---
+        self.solution = None
+        self.showing_solution = False
+        self.algo_ran = False
+        self.running = False
+        self.controls.set_controls_enabled(True)
+        self.sidebar.update_metrics_table({})
+
+        # --- Vẽ lại mê cung mới ---
+        self.full_redraw()
+
+        # --- Cập nhật bố cục (canvas + sidebar) ---
+        self.root.update_idletasks()

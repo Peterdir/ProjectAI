@@ -23,8 +23,17 @@ class ControlsFrame(tk.Frame):
         self.algo_menu.grid(row=1, column=0, sticky="w", padx=5, pady=5)
         self.random_maze_btn = tk.Button(self, text="Random Mê Cung", command=self.callbacks["random_maze"])
         self.random_maze_btn.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
-        
+
+        # Chọn kích thước mê cung
+        self.size_var = tk.StringVar(value="21x31")
+        sizes = ["10x10", "15x15", "21x31"]
+        self.size_menu = tk.OptionMenu(self, self.size_var, *sizes)
+        self.size_menu.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
+        # Khi người dùng chọn kích thước → gọi callback
+        self.size_var.trace_add("write", lambda *_: self.callbacks["change_size"](self.size_var.get()))
+
         self.grid_columnconfigure((0,1,2), weight=1)
+
 
     def setup_algo_menu(self):
         algos = discover_algorithms()
