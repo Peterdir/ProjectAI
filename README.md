@@ -243,3 +243,4 @@ Nếu có thắc mắc về code, bạn có thể liên hệ nhóm chúng tôi q
 
 > Thả 1 star ⭐ nếu cảm thấy dự án này hữu ích nhé!
 
+[<img src="https://img.youtube.com/vi/lkdVm7dHHK0/maxresdefault.jpg" width="50%">](https://youtu.be/lkdVm7dHHK0)
