@@ -50,18 +50,18 @@ class ControlsFrame(ctk.CTkFrame):
         algos = discover_algorithms()
         grouped = {}
 
-        # Gom nhóm theo thư mục con (info / noinfo / khác)
+        # Gom nhóm theo thư mục cha (ví dụ "Nhom 1", "Nhom 2")
         for key in algos.keys():
             parts = key.replace("\\", "/").split("/")
             group = parts[0] if len(parts) > 1 else "Khác"
-            algo = parts[-1]
-            grouped.setdefault(group, []).append((algo, key))
+            grouped.setdefault(group, []).append(key)
 
         # Tạo danh sách hiển thị
         display_options = []
-        for group, items in sorted(grouped.items()):
-            for algo, full in sorted(items):
-                display_name = f"{group} → {algo}"
+        for group, keys in sorted(grouped.items()):
+            for full in sorted(keys):
+                display_label = algos[full]["display"]  # vd: Breadth-First Search
+                display_name = f"{group} → {display_label}"
                 display_options.append(display_name)
                 self.algo_display_map[display_name] = full
 
@@ -77,6 +77,7 @@ class ControlsFrame(ctk.CTkFrame):
             variable=self.selected_algo,
             values=display_options
         )
+
 
     def get_selected_algorithm_key(self):
         """Trả về key thật sự (ví dụ: 'info/astar') để load thuật toán."""
