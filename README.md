@@ -132,47 +132,60 @@ python3 app.py
 
 ### Nhóm 1: Tìm kiếm không có thông tin
 * Breadth-First Search [BFS](video/bfs.mp4)
- [![Xem thuật toán BFS](https://raw.githubusercontent.com/Peterdir/ProjectAI/main/thumbnails/bfs.jpg)](https://raw.githubusercontent.com/Peterdir/ProjectAI/main/video/bfs.mp4)
-
+#### Xem thuật toán BFS trên Youtube
+[<img src="https://img.youtube.com/vi/lkdVm7dHHK0/maxresdefault.jpg" width="50%">](https://youtu.be/lkdVm7dHHK0)
 * Depth-First Search [DFS](video/dfs.mp4)
-[![Xem thuật toán Depth-First Search trên Youtube](thumbnails/dfs.jpg)](https://www.youtube.com/watch?v=a7o1QR4db7A)
+#### Xem thuật toán DFS trên Youtube
+[<img src="https://img.youtube.com/vi/a7o1QR4db7A/maxresdefault.jpg" width="50%">](https://youtu.be/a7o1QR4db7A)
 * Iterative Deepening DFS [IDS](video/ids.mp4)
-[![Xem thuật toán Iterative Deepening DFS trên Youtube](thumbnails/ids.jpg)](https://www.youtube.com/watch?v=y2_77J-UUF0)
+#### Xem thuật toán IDS trên Youtube
+[<img src="https://img.youtube.com/vi/y2_77J-UUF0/maxresdefault.jpg" width="50%">](https://youtu.be/y2_77J-UUF0)
 ### Nhóm 2: Tìm kiếm có thông tin
 * Uniform Cost Search [UCS](video/ucs.mp4)
-[![Xem thuật toán Uniform Cost Search trên Youtube](thumbnails/ucs.jpg)](https://www.youtube.com/watch?v=XQOEQzFJ0J8)
+#### Xem thuật toán UCS trên Youtube
+[<img src="https://img.youtube.com/vi/XQOEQzFJ0J8/maxresdefault.jpg" width="50%">](https://youtu.be/XQOEQzFJ0J8)
 * Greedy Best-First Search [Greedy](video/greedy.mp4)
-[![Xem thuật toán Greedy Best-First Search trên Youtube](thumbnails/greedy.jpg)](https://www.youtube.com/watch?v=5n4yFOvHwG8)
+#### Xem thuật toán Greedy trên Youtube
+[<img src="https://img.youtube.com/vi/5n4yFOvHwG8/maxresdefault.jpg" width="50%">](https://youtu.be/5n4yFOvHwG8)
 * A* Search [A*](video/astar.mp4)
-[![Xem thuật toán A* Search trên Youtube](thumbnails/astar.jpg)](https://www.youtube.com/watch?v=-dSj1eJg3g8)
+#### Xem thuật toán A* trên Youtube
+[<img src="https://img.youtube.com/vi/-dSj1eJg3g8/maxresdefault.jpg" width="50%">](https://youtu.be/-dSj1eJg3g8)
 
 ### Nhóm 3: Tìm kiếm tối ưu hóa
 * Beam Search [Beam](video/beam.mp4)
-[![Xem thuật toán Beam Search trên Youtube](thumbnails/beam.jpg)](https://www.youtube.com/watch?v=-YWgv18ILjM)
+#### Xem thuật toán Beam trên Youtube
+[<img src="https://img.youtube.com/vi/-YWgv18ILjM/maxresdefault.jpg" width="50%">](https://youtu.be/-YWgv18ILjM)
 * Hill Climbing [Hill](video/hill.mp4)
-[![Xem thuật toán Hill Climbing trên Youtube](thumbnails/hill.jpg)](https://www.youtube.com/watch?v=tnEJdaJVpwg)
+#### Xem thuật toán Hill trên Youtube
+[<img src="https://img.youtube.com/vi/tnEJdaJVpwg/maxresdefault.jpg" width="50%">](https://youtu.be/tnEJdaJVpwg)
 * Simulated Annealing [Simulated](video/simulated.mp4)
-[![Xem thuật toán Simulated Annealing trên Youtube](thumbnails/simulated.jpg)](https://www.youtube.com/watch?v=9q9sUCsdJUI)
+#### Xem thuật toán Simulated trên Youtube
+[<img src="https://img.youtube.com/vi/9q9sUCsdJUI/maxresdefault.jpg" width="50%">](https://youtu.be/9q9sUCsdJUI)
 
 ### Nhóm 4: Tìm kiếm dựa trên mức độ quan sát /xác định của môi trường
 * Anchor Search [Anchor](video/anchor.mp4)
-[![Xem thuật toán Anchor Search trên Youtube](thumbnails/anchor.jpg)](https://www.youtube.com/watch?v=Edh7FfOdwbY)
+#### Xem thuật toán Anchor trên Youtube
+[<img src="https://img.youtube.com/vi/Edh7FfOdwbY/maxresdefault.jpg" width="50%">](https://youtu.be/Edh7FfOdwbY)
 * AND-OR Search [AND-OR](video/and_or.mp4)
-[![Xem thuật toán AND-OR Search trên Youtube](thumbnails/and_or.jpg)](https://www.youtube.com/watch?v=bCGtLPW-qgU)
+#### Xem thuật toán AND-OR trên Youtube
+[<img src="https://img.youtube.com/vi/bCGtLPW-qgU/maxresdefault.jpg" width="50%">](https://youtu.be/bCGtLPW-qgU)
 * No Observation [No-Observation](video/no_ob.mp4)
-[![Xem thuật toán No Observation trên Youtube](thumbnails/no_ob.jpg)](https://www.youtube.com/watch?v=UEIL9LKo8g8)
+#### Xem thuật toán No Observation trên Youtube
+[<img src="https://img.youtube.com/vi/UEIL9LKo8g8/maxresdefault.jpg" width="50%">](https://youtu.be/UEIL9LKo8g8)
 
 ### Nhóm 5: Tìm kiếm dựa trên thông tin ràng buộc
 * AC-3 [AC-3](video/ac3.mp4)
-[![Xem thuật toán AC-3 trên Youtube](thumbnails/ac3.jpg)](https://www.youtube.com/watch?v=Rde7wIof2kk)
+#### Xem thuật toán AC-3 trên Youtube
+[<img src="https://img.youtube.com/vi/Rde7wIof2kk/maxresdefault.jpg" width="50%">](https://youtu.be/Rde7wIof2kk)
 * Backtracking [Backtracking](video/backtrack.mp4)
-[![Xem thuật toán Backtracking trên Youtube](thumbnails/backtrack.jpg)](https://www.youtube.com/watch?v=rcbGf-vI-F4)
+#### Xem thuật toán Backtracking trên Youtube
+[<img src="https://img.youtube.com/vi/rcbGf-vI-F4/maxresdefault.jpg" width="50%">](https://youtu.be/rcbGf-vI-F4)
 * Forward Checking [Forward Checking](video/fc.mp4)
-[![Xem thuật toán Forward Checking trên Youtube](thumbnails/fc.jpg)](https://www.youtube.com/watch?v=8yG5f7ZGfk8)
+#### Xem thuật toán Forward Checking trên Youtube
+[<img src="https://img.youtube.com/vi/8yG5f7ZGfk8/maxresdefault.jpg" width="50%">](https://youtu.be/8yG5f7ZGfk8)
 
 ### Nhóm 6: Tìm kiếm đối kháng
 * Alpha-Beta Pruning [Alpha-Beta](video/anpha-beta.mp4)
-[![Xem thuật toán Alpha-Beta trên Youtube](thumbnails/alpha-beta.jpg)](https://www.youtube.com/watch?v=rcbGf-vI-F4)
 * Minimax [Minimax](video/minimax.mp4)
 * Negamax [Negamax](video/negamax.mp4)
 
