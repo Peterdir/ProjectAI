@@ -201,12 +201,12 @@ Có thể điều chỉnh tọa độ nhân vật bằng cách click chuột và
 hoặc có thể nhập tọa độ thủ công với nút **Đặt vị trí bắt đầu** nhân vật sẽ di chuyển đến ô đó
 
 Ở trên giao diện có các nút tương tác:
-- **[Nhóm thuật toán và thuật toán]** chẳng hạn như **Nhom 1 → Breadth-First Search**, được phép nhấn vào nút OptionMenu này để chọn các nhóm thuật toán khác
+- **[Nhóm thuật toán và thuật toán]** chẳng hạn như **Nhom 1 → Breadth-First Search**, được phép nhấn vào nút **OptionMenu** này để chọn các nhóm thuật toán khác
 - **[Grid lines]** Nhấn vào nút button này để bật/tắt lưới trên mê cung (sẽ thấy được mê cung 1 cách trực quan)
 - **[Show Solution]** Nhấn vào nút button này để hiện thị đường đi theo thuật toán đã chọn
 - **[Reset]** Nhấn vào nút button này để reset lại mê cung
 - **[Random Mê Cung]** Nhấn vào nút button này để tạo mê cung ngẫu nhiên theo kích thước đã được setting sẵn (mặc định là mê cung có kích thước `21x31`)
-- Chỉnh kích thước mê cung bằng cách nhấn vào OptionMenu mặc định `21x31`
+- Chỉnh kích thước mê cung bằng cách nhấn vào **OptionMenu** mặc định `21x31` (Các kích thước khác `10x10`, `15x15`)
 - Toggle **Thêm tường ngẫu nhiên khi di chuyển**: Tạo tường trong mê cung làm khó thuật toán
 - Hai bảng nhỏ :
   - **Chỉ số thuật toán**: Những chỉ số chính của thuật toán chẳng hạn như **Steps** (Số bước đi), **Visited** (Số ô đã thăm), **Time** (Thời gian thực hiện thuật toán),...
