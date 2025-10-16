@@ -17,7 +17,8 @@ class MazeApp:
         self.root = root
         self.root.title("Mê Cung Solver (CTk Edition)")
         self.root.geometry('1920x800+0+0')
-
+        # Chặn thoát nếu đang chạy
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close_request)
         # Trạng thái
         self.maze = MAZE
         self.player = START
@@ -337,3 +338,25 @@ class MazeApp:
 
         # --- Cập nhật bố cục (canvas + sidebar) ---
         self.root.update_idletasks()
+    def on_close_request(self):
+        if self.running:
+            CTkMessagebox(
+                title="Không thể thoát",
+                message="Vui lòng đợi thuật toán chạy xong trước khi thoát.",
+                icon="warning"
+            )
+            return
+
+        if self.algo_ran and not self.running:
+            confirm = CTkMessagebox(
+                title="Xác nhận thoát",
+                message="Thuật toán đã hoàn tất. Bạn có chắc muốn thoát?",
+                icon="question",
+                option_1="Có",
+                option_2="Không"
+            )
+            if confirm.get() == "Không":
+                return
+
+        # Nếu không có thuật toán đang chạy => thoát bình thường
+        self.root.destroy()
