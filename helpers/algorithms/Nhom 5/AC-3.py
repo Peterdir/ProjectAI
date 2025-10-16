@@ -23,33 +23,20 @@ def find_path(maze, start, goal, callback=None, update_callback=None):
 
     initial_domain_size = sum(len(d) for d in domains.values())
 
-    # --- Hàng đợi (Queue) chứa tất cả các cung (arc) ---
     queue = deque([(Xi, Xj) for Xi in variables for Xj in domains[Xi]])
 
-    # --- Hàm Revise ---
     def revise(Xi, Xj):
-        """
-        Trả về True nếu miền của Xi bị thay đổi.
-        Logic: Loại bỏ Xj khỏi miền của Xi nếu Xj không có lối ra nào khác ngoài Xi.
-        Điều này đặc biệt hiệu quả để loại bỏ các ngõ cụt dài.
-        """
         revised = False
-        # Nếu Xj là ngõ cụt và không phải là đích, ta có thể loại nó khỏi đường đi của Xi
         if Xj != goal and len(domains[Xj]) == 1: # Xj chỉ có 1 lối ra duy nhất là quay lại Xi
             if Xj in domains[Xi]:
                 domains[Xi].remove(Xj)
                 revised = True
         return revised
     
-    # --- Vòng lặp chính của AC-3 ---
     while queue:
         Xi, Xj = queue.popleft()
 
-        # Chúng ta đảo ngược cung để kiểm tra tính nhất quán
-        # Logic: Nếu Xj trở thành ngõ cụt, thì cung (Xi, Xj) không còn hữu ích
         if revise(Xj, Xi): 
-            # Nếu miền của Xj bị thu hẹp (nó bị loại khỏi hàng xóm của Xi),
-            # ta phải xét lại tất cả các cung đi vào Xj.
             for Xk in domains[Xj]:
                 if Xk != Xi:
                     queue.append((Xk, Xj))
@@ -76,9 +63,7 @@ def find_path(maze, start, goal, callback=None, update_callback=None):
 
         visited.add(state)
 
-        # Duyệt qua các hàng xóm trong domain đã được AC-3 lọc
         for next_state in domains.get(state, []):
-            # Hàm and_search chỉ có 1 kết quả nên có thể đơn giản hóa
             plan = back_trackSearch(next_state, path + [state])
             if plan is not None:
                 return [next_state] + plan
