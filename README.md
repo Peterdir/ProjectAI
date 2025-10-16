@@ -132,7 +132,7 @@ python3 app.py
 
 ### Nhóm 1: Tìm kiếm không có thông tin
 * Breadth-First Search [BFS](video/bfs.mp4)
-[![Xem thuật toán Breadth-First Search trên Youtube](thumbnails/bfs.jpg)](https://www.youtube.com/watch?v=lkdVm7dHHK0)
+ [![Xem thuật toán BFS](https://raw.githubusercontent.com/Peterdir/ProjectAI/main/thumbnails/bfs.jpg)](https://raw.githubusercontent.com/Peterdir/ProjectAI/main/video/bfs.mp4)
 
 * Depth-First Search [DFS](video/dfs.mp4)
 [![Xem thuật toán Depth-First Search trên Youtube](thumbnails/dfs.jpg)](https://www.youtube.com/watch?v=a7o1QR4db7A)
@@ -243,7 +243,3 @@ Nếu có thắc mắc về code, bạn có thể liên hệ nhóm chúng tôi q
 
 > Thả 1 star ⭐ nếu cảm thấy dự án này hữu ích nhé!
 
-<video width="480" controls>
-  <source src="video/bfs.mp4" type="video/mp4">
-  Trình duyệt của bạn không hỗ trợ thẻ video.
-</video>
