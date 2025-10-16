@@ -10,7 +10,7 @@ from ui.start_position_input import ask_start_position
 import random
 import traceback
 from CTkMessagebox import CTkMessagebox
-
+import copy 
 
 class MazeApp:
     def __init__(self, root: ctk.CTk):
@@ -71,8 +71,9 @@ class MazeApp:
 
         # Toggle thêm tường ngẫu nhiên
         self.random_walls_toggle = RandomWallsToggle(
-            main_frame, callback=lambda state: print("Random walls:", state)
+            main_frame, callback=self.on_random_walls_toggle
         )
+
         self.random_walls_toggle.grid(row=2, column=0, sticky="w", pady=(10, 0))
 
     def bind_events(self):
@@ -106,17 +107,24 @@ class MazeApp:
                 self.add_random_walls(count=3)
                 self.full_redraw()
 
+
             if self.player == self.goal:
                 self.on_win()
 
     def add_random_walls(self, count=3):
-        rows, cols = len(self.maze), len(self.maze[0])
+        # Tạo bản sao để tránh đụng vào tham chiếu cũ
+        maze_copy = copy.deepcopy(self.maze)
+        rows, cols = len(maze_copy), len(maze_copy[0])
         added = 0
+
         while added < count:
             r, c = random.randint(0, rows - 1), random.randint(0, cols - 1)
-            if self.maze[r][c] == 0 and (r, c) not in [self.player, self.goal]:
-                self.maze[r][c] = 1
+            if maze_copy[r][c] == 0 and (r, c) not in [self.player, self.goal]:
+                maze_copy[r][c] = 1
                 added += 1
+
+        # Gán lại vào self.maze để canvas vẽ lại đúng
+        self.maze = maze_copy
 
     def on_win(self):
         CTkMessagebox(title="Hoàn thành!", message="Chúc mừng — bạn đã đến đích!")
@@ -360,3 +368,20 @@ class MazeApp:
 
         # Nếu không có thuật toán đang chạy => thoát bình thường
         self.root.destroy()
+
+    def on_random_walls_toggle(self, enabled):
+        if enabled:
+            self.start_random_walls()
+        else:
+            if hasattr(self, "random_wall_job") and self.random_wall_job:
+                self.root.after_cancel(self.random_wall_job)
+                self.random_wall_job = None
+
+    def start_random_walls(self):
+        """Tự động thêm tường ngẫu nhiên liên tục khi toggle bật"""
+        if not self.random_walls_toggle.is_enabled():
+            return
+        self.add_random_walls(count=3)
+        self.full_redraw()
+        # lặp lại sau 2 giây
+        self.random_wall_job = self.root.after(3000, self.start_random_walls)
