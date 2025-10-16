@@ -16,7 +16,7 @@ class MazeApp:
     def __init__(self, root: ctk.CTk):
         self.root = root
         self.root.title("Mê Cung Solver (CTk Edition)")
-        self.root.state("zoomed")
+        self.root.geometry('1920x800+0+0')
 
         # Trạng thái
         self.maze = MAZE

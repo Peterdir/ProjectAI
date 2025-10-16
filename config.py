@@ -1,4 +1,4 @@
-CELL_SIZE = 45
+CELL_SIZE = 38
 PATH_COLOR = "white"
 SOLUTION_COLOR = "skyblue"
 GRID_LINE_COLOR = "#dddddd"
