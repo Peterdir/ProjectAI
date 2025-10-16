@@ -139,7 +139,7 @@ python3 app.py
 [<img src="https://img.youtube.com/vi/a7o1QR4db7A/maxresdefault.jpg" width="50%">](https://youtu.be/a7o1QR4db7A)
 * Iterative Deepening DFS [IDS](video/ids.mp4)
 #### Xem thuật toán IDS trên Youtube
-[<img src="https://img.youtube.com/vi/y2_77J-UUF0/maxresdefault.jpg" width="50%">](https://youtu.be/y2_77J-UUF0)
+[<img src="./thumbnails/ids.jpg" width="50%">](https://youtu.be/y2_77J-UUF0)
 ### Nhóm 2: Tìm kiếm có thông tin
 * Uniform Cost Search [UCS](video/ucs.mp4)
 #### Xem thuật toán UCS trên Youtube
@@ -221,7 +221,7 @@ hoặc có thể nhập tọa độ thủ công với nút **Đặt vị trí b�
   - **Không tìm thấy đường đi**: 
   ![image](./image/not_found.png)
   - **Xác nhận thoát app**: 
-  ![image](./image/confirm_exit.png)
+  ![image](./image/comfirm_exit.png)
 
 
 
@@ -256,4 +256,3 @@ Nếu có thắc mắc về code, bạn có thể liên hệ nhóm chúng tôi q
 
 > Thả 1 star ⭐ nếu cảm thấy dự án này hữu ích nhé!
 
-[<img src="https://img.youtube.com/vi/lkdVm7dHHK0/maxresdefault.jpg" width="50%">](https://youtu.be/lkdVm7dHHK0)
