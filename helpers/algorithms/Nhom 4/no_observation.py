@@ -1,4 +1,3 @@
-from collections import deque
 import time
 
 def check_valid(r, c, R, C, maze, visited):

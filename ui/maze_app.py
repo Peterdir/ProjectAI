@@ -240,16 +240,6 @@ class MazeApp:
 
     def random_maze(self, seed=None):
         global ROWS, COLS, START, GOAL
-        ROWS, COLS = 21, 31
-        self.maze, self.player, self.goal, used_seed = generate_random_maze(
-            ROWS, COLS, seed
-        )
-        START, GOAL = self.player, self.goal
-        self.sidebar.add_seed_to_history(used_seed)
-        self.reset_app()
-        canvas_w = COLS * CELL_SIZE
-        canvas_h = ROWS * CELL_SIZE
-        self.canvas.configure(width=canvas_w, height=canvas_h)
 
         rows, cols = len(self.maze), len(self.maze[0])
 
@@ -265,7 +255,6 @@ class MazeApp:
         canvas_h = rows * CELL_SIZE
         self.canvas.config(width=canvas_w, height=canvas_h)
         self.full_redraw()
-
     def on_seed_double_click(self, seed):
         if self.running:
             CTkMessagebox(title="Đang chạy", message="Vui lòng đợi thuật toán kết thúc.")
