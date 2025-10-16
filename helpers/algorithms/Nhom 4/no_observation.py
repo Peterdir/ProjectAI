@@ -1,68 +1,59 @@
-from queue import Queue
+from collections import deque
 import time
 
-def check_valid(r, c, R, C, maze, parent):
-    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0 and (r, c) not in parent
+def check_valid(r, c, R, C, maze, visited):
+    return 0 <= r < R and 0 <= c < C and maze[r][c] == 0 and (r, c) not in visited
 
 def find_path(maze, start, goal=None, callback=None, update_callback=None):
     R, C = len(maze), len(maze[0])
-    queue = Queue()
-    queue.put(start)
-    parent = {start: None}
+    if goal is None:
+        goal = (R - 2, C - 2)
+
     dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+    visited = set()
+    path = []       # đường hiện tại
     steps = 0
     t0 = time.time()
     stats = {}
 
-    # Lưu node xa nhất
-    farthest_node = start
-    max_depth = 1
-
-    while not queue.empty():
-        r, c = queue.get()
+    def dfs(r, c):
+        nonlocal steps, stats
+        visited.add((r, c))
+        path.append((r, c))
         steps += 1
 
-        # Tính chiều dài đường hiện tại (depth)
-        path_length = 0
-        cur = (r, c)
-        while cur is not None:
-            path_length += 1
-            cur = parent[cur]
-
-        # Cập nhật node xa nhất nếu phát hiện node sâu hơn
-        if path_length > max_depth:
-            max_depth = path_length
-            farthest_node = (r, c)
-
-        # Cập nhật thống kê
+        # Cập nhật stats
         stats = {
             "Steps": steps,
-            "Visited nodes": len(parent),
+            "Visited nodes": len(visited),
             "Current node": (r, c),
-            "Queue size": queue.qsize(),
-            "Path length": path_length,
+            "Path length": len(path),
             "Time (ms)": (time.time() - t0) * 1000
         }
 
         if update_callback:
             update_callback(stats, highlight_keys=list(stats.keys()))
-
         if callback:
             callback((r, c))
 
-        # Blind mở rộng
+        # ĐÃ TỚI GOAL THẬT
+        if (r, c) == goal:
+            return True
+
+        # Thử các hướng
         for dr, dc in dirs:
             nr, nc = r + dr, c + dc
-            if check_valid(nr, nc, R, C, maze, parent):
-                parent[(nr, nc)] = (r, c)
-                queue.put((nr, nc))
+            if check_valid(nr, nc, R, C, maze, visited):
+                if dfs(nr, nc):
+                    return True
 
-    # Sau khi đi hết map → trích node xa nhất làm goal
-    goal = farthest_node
-    path = []
-    cur = goal
-    while cur is not None:
-        path.append(cur)
-        cur = parent[cur]
+        # BACKTRACK – quay lui
+        path.pop()         # gỡ node hiện tại khỏi đường đi
+        return False       # báo là nhánh này tắc
 
-    return list(reversed(path)), stats
+    success = dfs(start[0], start[1])
+
+    if success:
+        return path, stats
+    else:
+        return None, stats
