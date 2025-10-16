@@ -243,3 +243,7 @@ Nếu có thắc mắc về code, bạn có thể liên hệ nhóm chúng tôi q
 
 > Thả 1 star ⭐ nếu cảm thấy dự án này hữu ích nhé!
 
+<video width="480" controls>
+  <source src="video/bfs.mp4" type="video/mp4">
+  Trình duyệt của bạn không hỗ trợ thẻ video.
+</video>
